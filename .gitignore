@@ -11,3 +11,7 @@ desktop.ini
 
 # 注意：assets/video/ 里的 mp4 是站点的一部分，需要提交
 # 如果仓库体积过大（>1GB）再考虑 Git LFS
+
+# wrangler 本地构建产物
+.wrangler/
+node_modules/
