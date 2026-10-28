@@ -1,4 +1,4 @@
-# 图片/字体这类内容不变的文件长缓存；CSS/JS 要能更新，别设 immutable
+# 图片/视频这类内容不变的文件长缓存；CSS/JS 要能更新，别设 immutable
 /assets/img/*
   Cache-Control: public, max-age=31536000, immutable
 
@@ -10,18 +10,6 @@
 
 /assets/js/*
   Cache-Control: public, max-age=3600, must-revalidate
-
-/*.jpg
-  Cache-Control: public, max-age=31536000, immutable
-
-/*.png
-  Cache-Control: public, max-age=31536000, immutable
-
-/*.mp4
-  Cache-Control: public, max-age=2592000
-
-/*.woff2
-  Cache-Control: public, max-age=31536000, immutable
 
 /*.html
   Cache-Control: public, max-age=0, must-revalidate
