@@ -1,0 +1,987 @@
+/* 杨富超 · 个人网站 · 交互脚本 */
+(function () {
+  "use strict";
+
+  /* ---------- 移动端导航 ---------- */
+  var head = document.querySelector(".site-head");
+  var toggle = document.querySelector(".nav-toggle");
+  if (head && toggle) {
+    toggle.addEventListener("click", function () {
+      var open = head.classList.toggle("is-open");
+      toggle.setAttribute("aria-expanded", open ? "true" : "false");
+    });
+    document.addEventListener("click", function (e) {
+      if (!head.contains(e.target)) {
+        head.classList.remove("is-open");
+        toggle.setAttribute("aria-expanded", "false");
+      }
+    });
+  }
+
+  /* ---------- 筛选 ---------- */
+  document.querySelectorAll("[data-filter-group]").forEach(function (group) {
+    var listSel = group.getAttribute("data-filter-group");
+    var list = document.querySelectorAll(listSel + " [data-cat]");
+    group.querySelectorAll(".chip").forEach(function (chip) {
+      chip.addEventListener("click", function () {
+        group.querySelectorAll(".chip").forEach(function (c) {
+          c.classList.remove("is-active");
+          c.setAttribute("aria-pressed", "false");
+        });
+        chip.classList.add("is-active");
+        chip.setAttribute("aria-pressed", "true");
+        var key = chip.getAttribute("data-key");
+        list.forEach(function (item) {
+          var hit = key === "all" || item.getAttribute("data-cat") === key;
+          item.style.display = hit ? "" : "none";
+        });
+        /* 时间轴：筛完把空掉的年份章节一起收起 */
+        var groups = document.querySelectorAll(listSel + " [data-year-group]");
+        Array.prototype.forEach.call(groups, function (g) {
+          var any = false;
+          var el = g.nextElementSibling;
+          while (el && !el.hasAttribute("data-year-group")) {
+            if (el.hasAttribute("data-cat") && el.style.display !== "none") any = true;
+            el = el.nextElementSibling;
+          }
+          g.style.display = any ? "" : "none";
+        });
+        /* 作品页：标题旁的件数跟着筛选走 */
+        var cnt = document.querySelector('[data-count-for="' + listSel + '"]');
+        if (cnt) {
+          var n = 0;
+          list.forEach(function (item) {
+            if (item.style.display !== "none") n++;
+          });
+          cnt.textContent = (n < 10 ? "0" : "") + n;
+        }
+      });
+    });
+  });
+
+  /* ---------- 复制邮箱 ---------- */
+  var toast = document.querySelector(".toast");
+  var toastTimer;
+  function showToast(msg) {
+    if (!toast) return;
+    toast.textContent = msg;
+    toast.classList.add("is-on");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () {
+      toast.classList.remove("is-on");
+    }, 1800);
+  }
+
+  document.querySelectorAll("[data-copy]").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      var text = btn.getAttribute("data-copy");
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(
+          function () {
+            showToast("邮箱已复制：" + text);
+          },
+          function () {
+            showToast("复制失败，请手动选择");
+          }
+        );
+      } else {
+        var ta = document.createElement("textarea");
+        ta.value = text;
+        ta.style.position = "fixed";
+        ta.style.opacity = "0";
+        document.body.appendChild(ta);
+        ta.select();
+        try {
+          document.execCommand("copy");
+          showToast("邮箱已复制：" + text);
+        } catch (e) {
+          showToast("复制失败，请手动选择");
+        }
+        document.body.removeChild(ta);
+      }
+    });
+  });
+
+  /* ---------- 当前年份 ---------- */
+  document.querySelectorAll("[data-year]").forEach(function (el) {
+    el.textContent = new Date().getFullYear();
+  });
+})();
+
+/* ==========================================================================
+   动效层：阅读进度 / 光标氛围 / 首屏视差 / 滚动揭示 / 数字滚动 / 对比条
+   —— 全部围绕"入场"这一个动作，不改变任何内容
+   ========================================================================== */
+(function () {
+  "use strict";
+
+  var root = document.documentElement;
+  var body = document.body;
+  var reduce =
+    window.matchMedia &&
+    window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var touch =
+    (window.matchMedia && window.matchMedia("(hover: none)").matches) ||
+    "ontouchstart" in window;
+
+  /* ---------- 顶部阅读进度 ---------- */
+  var readbar = document.createElement("div");
+  readbar.className = "readbar";
+  readbar.innerHTML = "<i></i>";
+  body.appendChild(readbar);
+  var readFill = readbar.firstChild;
+
+  /* ---------- 滚动：进度条 + 首屏视差 + 头部状态 ---------- */
+  var heroPhoto = document.querySelector(".hero__photo");
+  var head = document.querySelector(".site-head");
+  var ticking = false;
+
+  function frame() {
+    ticking = false;
+    var y = window.pageYOffset || root.scrollTop;
+    var max = root.scrollHeight - window.innerHeight;
+    readFill.style.transform = "scaleX(" + (max > 0 ? Math.min(1, y / max) : 0) + ")";
+
+    if (heroPhoto && !reduce) {
+      var off = Math.min(y * 0.16, 44);
+      heroPhoto.style.transform =
+        "translate3d(0," + off.toFixed(1) + "px,0) scale(1.06)";
+    }
+    if (head) head.classList.toggle("is-stuck", y > 10);
+  }
+
+  window.addEventListener(
+    "scroll",
+    function () {
+      if (!ticking) {
+        ticking = true;
+        requestAnimationFrame(frame);
+      }
+    },
+    { passive: true }
+  );
+  window.addEventListener("resize", frame, { passive: true });
+  frame();
+
+  /* ---------- 数字滚动 ---------- */
+  function group(n) {
+    var s = String(n);
+    var dot = s.indexOf(".");
+    var int = dot < 0 ? s : s.slice(0, dot);
+    var dec = dot < 0 ? "" : s.slice(dot);
+    return int.replace(/\B(?=(\d{3})+(?!\d))/g, ",") + dec;
+  }
+
+  function countUp(el) {
+    if (el.getAttribute("data-done") === "1") return;
+    el.setAttribute("data-done", "1");
+    var to = parseFloat(el.getAttribute("data-count")) || 0;
+    var dec = parseInt(el.getAttribute("data-dec") || "0", 10);
+    var dur = parseInt(el.getAttribute("data-dur") || "1600", 10);
+    var put = function (v) {
+      el.textContent = dec ? v.toFixed(dec) : group(Math.round(v));
+    };
+    if (reduce) {
+      put(to);
+      return;
+    }
+    var t0 = null;
+    var done = false;
+    var step = function (t) {
+      if (t0 === null) t0 = t;
+      var k = Math.min(1, (t - t0) / dur);
+      var e = 1 - Math.pow(1 - k, 3);
+      put(to * e);
+      if (k < 1) {
+        requestAnimationFrame(step);
+      } else {
+        done = true;
+        put(to);
+      }
+    };
+    requestAnimationFrame(step);
+    /* 兜底：标签页被挂起或 rAF 被限流时，别让数字停在 0 */
+    setTimeout(function () {
+      if (!done) put(to);
+    }, dur + 900);
+  }
+
+  /* ---------- 揭示 / 数字 / 对比条 ---------- */
+  var targets = document.querySelectorAll(
+    "[data-reveal],[data-reveal-group],[data-count],[data-bar]"
+  );
+
+  document.querySelectorAll("[data-reveal-group]").forEach(function (g) {
+    Array.prototype.forEach.call(g.children, function (c, i) {
+      c.style.setProperty("--d", i * 80 + "ms");
+    });
+  });
+
+  function activate(el) {
+    el.classList.add("is-in");
+    if (el.hasAttribute("data-bar")) {
+      el.style.setProperty("--p", el.getAttribute("data-bar"));
+      el.classList.add("is-in");
+    }
+    if (el.hasAttribute("data-count")) countUp(el);
+    el.querySelectorAll("[data-bar]").forEach(function (b) {
+      b.style.setProperty("--p", b.getAttribute("data-bar"));
+      b.classList.add("is-in");
+    });
+    el.querySelectorAll("[data-count]").forEach(countUp);
+  }
+
+  if ("IntersectionObserver" in window && !reduce && targets.length) {
+    var io = new IntersectionObserver(
+      function (entries) {
+        entries.forEach(function (en) {
+          if (!en.isIntersecting) return;
+          activate(en.target);
+          io.unobserve(en.target);
+        });
+      },
+      { threshold: 0.08, rootMargin: "0px 0px -8% 0px" }
+    );
+    Array.prototype.forEach.call(targets, function (el) {
+      io.observe(el);
+    });
+  } else {
+    Array.prototype.forEach.call(targets, activate);
+  }
+
+  /* ---------- 卡片光斑跟随 ---------- */
+  if (!touch) {
+    body.addEventListener(
+      "pointermove",
+      function (e) {
+        var t = e.target.closest ? e.target.closest(".stat,.cap") : null;
+        if (!t) return;
+        var r = t.getBoundingClientRect();
+        t.style.setProperty(
+          "--mx",
+          (((e.clientX - r.left) / r.width) * 100).toFixed(1) + "%"
+        );
+        t.style.setProperty(
+          "--my",
+          (((e.clientY - r.top) / r.height) * 100).toFixed(1) + "%"
+        );
+      },
+      { passive: true }
+    );
+  }
+})();
+
+/* ==========================================================================
+   证书环绕：3D 环形排布，从左到右依次转过前台
+   窄屏 / 无 JS 时退化成横向滑动条
+   ========================================================================== */
+(function () {
+  "use strict";
+
+  var sect = document.querySelector("[data-cert-ring]");
+  if (!sect) return;
+
+  var ring = sect.querySelector("[data-ring]");
+  var stage = sect.querySelector("[data-ring-stage]");
+  var cards = Array.prototype.slice.call(ring.querySelectorAll(".ring__card"));
+  var n = cards.length;
+  if (!n) return;
+
+  var step = 360 / n;
+  var dotsBox = sect.querySelector("[data-ring-dots]");
+  var btnPrev = sect.querySelector("[data-ring-prev]");
+  var btnNext = sect.querySelector("[data-ring-next]");
+  var box = document.querySelector("[data-lightbox]");
+  var boxImg = document.querySelector("[data-lightbox-img]");
+  var reduce =
+    window.matchMedia &&
+    window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  var i = 0;
+  var radius = 420;
+  var timer = null;
+  var isRing = false;
+  var inView = true;
+
+  var countEl = sect.querySelector("[data-ring-count]");
+
+  /* 给每张证的图框铺一层同图模糊底 */
+  cards.forEach(function (c) {
+    var img = c.querySelector("img");
+    var box = c.querySelector(".ring__img");
+    if (img && box) {
+      box.style.setProperty(
+        "--bg",
+        'url("' + img.getAttribute("src") + '")'
+      );
+    }
+  });
+
+  function pad(v) {
+    return (v < 10 ? "0" : "") + v;
+  }
+
+  var dots = cards.map(function (c, k) {
+    var b = document.createElement("button");
+    b.type = "button";
+    b.className = "ring-dot";
+    b.setAttribute("aria-label", "第 " + (k + 1) + " 张");
+    b.addEventListener("click", function () {
+      go(k, true);
+    });
+    if (dotsBox) dotsBox.appendChild(b);
+    return b;
+  });
+
+  function measure() {
+    var w = cards[0].offsetWidth || 320;
+    radius = Math.round(w / 2 / Math.tan(Math.PI / n)) + 6;
+  }
+
+  function place(front) {
+    if (!isRing) return;
+    cards.forEach(function (c, k) {
+      var lift = k === front ? 26 : 0;
+      c.style.transform =
+        "rotateY(" +
+        -k * step +
+        "deg) translateZ(" +
+        (radius + lift) +
+        "px)";
+      c.classList.toggle("is-on", k === front);
+    });
+  }
+
+  function render() {
+    var front = ((i % n) + n) % n;
+    ring.style.transform =
+      "translateZ(" + -radius + "px) rotateY(" + i * step + "deg)";
+    place(front);
+    dots.forEach(function (d, k) {
+      d.classList.toggle("is-on", k === front);
+    });
+    if (countEl) {
+      countEl.innerHTML = "<b>" + pad(front + 1) + "</b> / " + pad(n);
+    }
+  }
+
+  function go(k, user) {
+    i = k;
+    if (i > 900 || i < -900) {
+      i = ((i % n) + n) % n;
+      ring.style.transition = "none";
+      render();
+      requestAnimationFrame(function () {
+        ring.style.transition = "";
+      });
+    } else {
+      render();
+    }
+    if (user) restart();
+  }
+
+  function start() {
+    if (reduce || !isRing || !inView || timer) return;
+    timer = setInterval(function () {
+      go(i + 1);
+    }, 4200);
+  }
+
+  function stop() {
+    if (timer) {
+      clearInterval(timer);
+      timer = null;
+    }
+  }
+
+  function restart() {
+    stop();
+    start();
+  }
+
+  function enable() {
+    isRing = true;
+    sect.classList.add("is-ring");
+    measure();
+    render();
+    start();
+  }
+
+  function disable() {
+    isRing = false;
+    sect.classList.remove("is-ring");
+    stop();
+    ring.style.transform = "";
+    cards.forEach(function (c) {
+      c.style.transform = "";
+      c.classList.remove("is-on");
+    });
+  }
+
+  function sync() {
+    var wide = window.innerWidth > 900;
+    if (wide && !isRing) enable();
+    else if (!wide && isRing) disable();
+    else if (isRing) {
+      measure();
+      render();
+    }
+  }
+
+  /* 拖动 / 轻扫 */
+  var dragging = false;
+  var sx = 0;
+  var lx = 0;
+  var moved = false;
+
+  stage.addEventListener("pointerdown", function (e) {
+    if (!isRing) return;
+    dragging = true;
+    moved = false;
+    sx = lx = e.clientX;
+    sect.classList.add("is-dragging");
+    stop();
+  });
+
+  window.addEventListener(
+    "pointermove",
+    function (e) {
+      if (!dragging) return;
+      lx = e.clientX;
+      var dx = lx - sx;
+      if (Math.abs(dx) > 6) moved = true;
+      ring.style.transform =
+        "translateZ(" +
+        -radius +
+        "px) rotateY(" +
+        (i * step + dx * 0.2) +
+        "deg)";
+    },
+    { passive: true }
+  );
+
+  window.addEventListener("pointerup", function () {
+    if (!dragging) return;
+    dragging = false;
+    sect.classList.remove("is-dragging");
+    var dx = lx - sx;
+    if (Math.abs(dx) > 40) go(i + (dx < 0 ? 1 : -1));
+    else render();
+    start();
+  });
+
+  /* 点卡片：中间的看大图，两侧的转过去 */
+  cards.forEach(function (c, k) {
+    c.addEventListener("click", function () {
+      if (moved) return;
+      /* 窄屏是横排，点哪张就看哪张 */
+      if (!isRing) {
+        openBox(c);
+        return;
+      }
+      var front = ((i % n) + n) % n;
+      if (k === front) {
+        openBox(c);
+        return;
+      }
+      var diff = (((k - i) % n) + n) % n;
+      go(diff <= n / 2 ? i + diff : i - (n - diff), true);
+    });
+  });
+
+  if (btnNext)
+    btnNext.addEventListener("click", function () {
+      go(i + 1, true);
+    });
+  if (btnPrev)
+    btnPrev.addEventListener("click", function () {
+      go(i - 1, true);
+    });
+
+  sect.addEventListener("mouseenter", stop);
+  sect.addEventListener("mouseleave", function () {
+    if (!dragging) start();
+  });
+
+  document.addEventListener("keydown", function (e) {
+    /* 大图打开时左右键归大图用，别顺手把环也转了 */
+    if (!isRing || !inView || document.querySelector(".lightbox.is-on")) return;
+    if (e.key === "ArrowRight") go(i + 1, true);
+    if (e.key === "ArrowLeft") go(i - 1, true);
+  });
+
+  if ("IntersectionObserver" in window) {
+    new IntersectionObserver(
+      function (en) {
+        inView = en[0].isIntersecting;
+        if (inView) start();
+        else stop();
+      },
+      { threshold: 0.15 }
+    ).observe(sect);
+  }
+
+  /* 大图 */
+  function openBox(card) {
+    var img = card.querySelector("img");
+    if (!box || !img) return;
+    boxImg.src = img.getAttribute("src");
+    boxImg.alt = img.getAttribute("alt") || "";
+    box.classList.add("is-on");
+    box.setAttribute("aria-hidden", "false");
+    stop();
+  }
+  function closeBox() {
+    box.classList.remove("is-on");
+    box.setAttribute("aria-hidden", "true");
+    start();
+  }
+  if (box) {
+    box.addEventListener("click", function (e) {
+      if (e.target === box || e.target.hasAttribute("data-lightbox-close")) {
+        closeBox();
+      }
+    });
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape") closeBox();
+    });
+  }
+
+  window.addEventListener("resize", sync, { passive: true });
+  sync();
+})();
+
+/* ==========================================================================
+   时光轴：红线跟着滚动长出来，读到哪一年哪一年就亮
+   ========================================================================== */
+(function () {
+  "use strict";
+
+  var wrap = document.querySelector("[data-timeline]");
+  if (!wrap) return;
+
+  var reduce =
+    window.matchMedia &&
+    window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var years = wrap.querySelectorAll("[data-year-group]");
+
+  function paint() {
+    if (reduce) {
+      wrap.style.setProperty("--tl-p", "1");
+      wrap.classList.add("is-full");
+      Array.prototype.forEach.call(years, function (y) {
+        y.classList.add("is-live");
+        y.classList.remove("is-past");
+      });
+      return;
+    }
+    var r = wrap.getBoundingClientRect();
+    var anchor = window.innerHeight * 0.58;
+    var p = (anchor - r.top) / r.height;
+    p = Math.max(0, Math.min(1, p));
+    wrap.style.setProperty("--tl-p", p.toFixed(4));
+    wrap.classList.toggle("is-full", p > 0.995);
+    wrap.classList.toggle("is-start", p < 0.004);
+
+    /* 已经翻到视口中线以上的最后一年，就是当前这一章 */
+    var line = window.innerHeight * 0.66;
+    var at = -1;
+    Array.prototype.forEach.call(years, function (y, i) {
+      if (y.getBoundingClientRect().top < line) at = i;
+    });
+    Array.prototype.forEach.call(years, function (y, i) {
+      y.classList.toggle("is-live", i === at);
+      y.classList.toggle("is-past", i < at);
+    });
+  }
+
+  var ticking = false;
+  function onScroll() {
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(function () {
+      ticking = false;
+      paint();
+    });
+  }
+
+  window.addEventListener("scroll", onScroll, { passive: true });
+  window.addEventListener("resize", onScroll);
+  paint();
+
+})();
+
+/* ==========================================================================
+   精选大屏轮播：自动走片、进度条、点标签/箭头/键盘/滑动都能切
+   ========================================================================== */
+(function () {
+  "use strict";
+
+  var stage = document.querySelector("[data-stage]");
+  if (!stage) return;
+
+  var slides = stage.querySelectorAll("[data-slide]");
+  var tabs = stage.querySelectorAll(".stage__tab");
+  if (slides.length < 2) return;
+
+  var vp = stage.querySelector(".stage__vp");
+  var reduce =
+    window.matchMedia &&
+    window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var DUR = 6800;
+  var idx = 0;
+  var raf = 0;
+  var el = 0; /* 已经走过的毫秒，暂停时不清零 */
+  var last = 0;
+  var paused = false;
+
+  function paintTabs() {
+    Array.prototype.forEach.call(tabs, function (t, i) {
+      var on = i === idx;
+      t.classList.toggle("is-on", on);
+      t.setAttribute("aria-pressed", on ? "true" : "false");
+      t.style.setProperty("--stage-p", on ? (reduce ? "1" : "0") : "0");
+    });
+  }
+
+  function halt() {
+    cancelAnimationFrame(raf);
+    last = 0;
+  }
+
+  function kick() {
+    halt();
+    if (reduce || paused || document.hidden) return;
+    raf = requestAnimationFrame(frame);
+  }
+
+  function frame(now) {
+    if (!last) last = now;
+    el += now - last;
+    last = now;
+    var t = Math.min(1, el / DUR);
+    if (tabs[idx]) tabs[idx].style.setProperty("--stage-p", t.toFixed(4));
+    if (t >= 1) {
+      go(idx + 1);
+      return;
+    }
+    raf = requestAnimationFrame(frame);
+  }
+
+  function go(n) {
+    idx = (n + slides.length) % slides.length;
+    Array.prototype.forEach.call(slides, function (s, i) {
+      s.classList.toggle("is-on", i === idx);
+      s.setAttribute("aria-hidden", i === idx ? "false" : "true");
+    });
+    paintTabs();
+    el = 0;
+    kick();
+  }
+
+  /* 手动操作后重新计时 */
+  Array.prototype.forEach.call(tabs, function (t) {
+    t.addEventListener("click", function () {
+      var n = parseInt(t.getAttribute("data-go"), 10) || 0;
+      if (n !== idx) go(n);
+    });
+  });
+
+  var prev = stage.querySelector("[data-prev]");
+  var next = stage.querySelector("[data-next]");
+  if (prev) prev.addEventListener("click", function () { go(idx - 1); });
+  if (next) next.addEventListener("click", function () { go(idx + 1); });
+
+  /* 悬停 / 聚焦时停下，别在用户看字的时候偷偷换页。
+     触屏没有 hover，绑了就会因 focus 卡在暂停态，所以只在鼠标环境启用 */
+  var fine = window.matchMedia && window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+  if (fine) {
+    stage.addEventListener("mouseenter", function () {
+      paused = true;
+      halt();
+    });
+    stage.addEventListener("mouseleave", function () {
+      paused = false;
+      kick();
+    });
+    stage.addEventListener("focusin", function () {
+      paused = true;
+      halt();
+    });
+    stage.addEventListener("focusout", function (e) {
+      if (stage.contains(e.relatedTarget)) return;
+      paused = false;
+      kick();
+    });
+  }
+
+  /* 键盘左右切换 */
+  if (vp) {
+    vp.addEventListener("keydown", function (e) {
+      if (e.key === "ArrowLeft") {
+        e.preventDefault();
+        go(idx - 1);
+      } else if (e.key === "ArrowRight") {
+        e.preventDefault();
+        go(idx + 1);
+      }
+    });
+  }
+
+  /* 手机上左右滑 */
+  var fromX = null;
+  if (vp) {
+    vp.addEventListener("pointerdown", function (e) {
+      fromX = e.clientX;
+    });
+    vp.addEventListener("pointerup", function (e) {
+      if (fromX === null) return;
+      var dx = e.clientX - fromX;
+      fromX = null;
+      if (Math.abs(dx) > 44) go(dx < 0 ? idx + 1 : idx - 1);
+    });
+    vp.addEventListener("pointercancel", function () {
+      fromX = null;
+    });
+  }
+
+  document.addEventListener("visibilitychange", function () {
+    if (document.hidden) halt();
+    else kick();
+  });
+
+  /* 切走再回来，不要接着算走了一半的那张 */
+  window.addEventListener("blur", halt);
+  window.addEventListener("focus", kick);
+
+  paintTabs();
+  go(0);
+})();
+
+/* ==========================================================================
+   死党页照片墙：点开大图，左右键/箭头翻页，Esc 关闭
+   ========================================================================== */
+(function () {
+  "use strict";
+
+  var wall = document.querySelector("[data-life-wall]");
+  if (!wall) return;
+
+  var box = document.querySelector("[data-life-box]");
+  if (!box) return;
+
+  var img = box.querySelector("[data-life-img]");
+  var cnt = box.querySelector("[data-life-count]");
+  var cap = box.querySelector("[data-life-cap]");
+  var cards = Array.prototype.slice.call(wall.querySelectorAll(".life-card"));
+  var list = [];
+  var at = 0;
+
+  function pad(v) {
+    return (v < 10 ? "0" : "") + v;
+  }
+
+  function visible() {
+    return cards.filter(function (c) {
+      return c.style.display !== "none";
+    });
+  }
+
+  function show(k) {
+    if (!list.length) return;
+    at = ((k % list.length) + list.length) % list.length;
+    var im = list[at].querySelector("img");
+    if (!im || !img) return;
+    img.src = im.getAttribute("src");
+    img.alt = im.getAttribute("alt") || "";
+    if (cnt) cnt.textContent = pad(at + 1) + " / " + pad(list.length);
+    if (cap) cap.textContent = im.getAttribute("alt") || "";
+  }
+
+  function open(card) {
+    list = visible();
+    var k = list.indexOf(card);
+    show(k < 0 ? 0 : k);
+    box.classList.add("is-on");
+    box.setAttribute("aria-hidden", "false");
+    document.body.style.overflow = "hidden";
+  }
+
+  function close() {
+    box.classList.remove("is-on");
+    box.setAttribute("aria-hidden", "true");
+    document.body.style.overflow = "";
+  }
+
+  cards.forEach(function (c) {
+    var btn = c.querySelector("[data-life-open]");
+    if (!btn) return;
+    btn.addEventListener("click", function () {
+      open(c);
+    });
+  });
+
+  box.addEventListener("click", function (e) {
+    if (e.target === box) return close();
+    if (e.target.hasAttribute("data-life-close")) return close();
+    if (e.target.closest("[data-life-prev]")) return show(at - 1);
+    if (e.target.closest("[data-life-next]")) return show(at + 1);
+  });
+
+  document.addEventListener("keydown", function (e) {
+    if (!box.classList.contains("is-on")) return;
+    if (e.key === "Escape") {
+      close();
+    } else if (e.key === "ArrowLeft") {
+      e.preventDefault();
+      show(at - 1);
+    } else if (e.key === "ArrowRight") {
+      e.preventDefault();
+      show(at + 1);
+    }
+  });
+})();
+
+/* ==========================================================================
+   死党页照片墙：分列瀑布流
+   css 多列是「填满一列再换下一列」，22 张排下来编号会跳读；
+   这里按「当前最矮的一列」投递，第一排才会是 01 02 03 04。
+   图片带了 width/height，没下载完也能算准高度，不会跳。
+   ========================================================================== */
+(function () {
+  "use strict";
+
+  var wall = document.querySelector("[data-life-wall]");
+  if (!wall) return;
+
+  var cards = Array.prototype.slice.call(wall.querySelectorAll(".life-card"));
+  if (!cards.length) return;
+
+  var cols = [];
+
+  function colCount() {
+    if (innerWidth <= 860) return 2;
+    if (innerWidth <= 1240) return 3;
+    return 4;
+  }
+
+  function flatten() {
+    cols.forEach(function (col) {
+      while (col.firstChild) wall.appendChild(col.firstChild);
+      wall.removeChild(col);
+    });
+    cols = [];
+  }
+
+  /* 高度按宽高比算，不读 offsetHeight：刚挂上去的节点量出来是 0，
+     整批都会挤到第一列去 */
+  function cardHeight(card, colW, gap) {
+    var im = card.querySelector("img");
+    var w = im ? Number(im.getAttribute("width")) : 0;
+    var h = im ? Number(im.getAttribute("height")) : 0;
+    var ratio = w && h ? h / w : 0.75;
+    return (colW - 2) * ratio + 2 + gap; /* 2px 上下边框 */
+  }
+
+  function layout() {
+    var n = colCount();
+    flatten();
+
+    for (var i = 0; i < n; i++) {
+      var d = document.createElement("div");
+      d.className = "life-col";
+      wall.appendChild(d);
+      cols.push(d);
+    }
+    wall.classList.add("is-mason");
+
+    var gap = n === 2 ? 12 : 16;
+    var colW = (wall.clientWidth - gap * (n - 1)) / n;
+    var heights = [];
+    for (var k = 0; k < n; k++) heights.push(0);
+
+    cards.forEach(function (card) {
+      if (card.style.display === "none") return;
+      var best = 0;
+      for (var j = 1; j < n; j++) {
+        if (heights[j] < heights[best] - 0.5) best = j;
+      }
+      heights[best] += cardHeight(card, colW, gap);
+      cols[best].appendChild(card);
+    });
+  }
+
+  layout();
+
+  /* 筛选之后重新分列，否则空出来的位置会留着 */
+  var filters = document.querySelector('.filters[data-filter-group=".life-wall"]');
+  if (filters) {
+    filters.addEventListener("click", function () {
+      setTimeout(layout, 0);
+    });
+  }
+
+  var timer;
+  addEventListener("resize", function () {
+    clearTimeout(timer);
+    timer = setTimeout(layout, 160);
+  });
+})();
+
+/* ==========================================================================
+   成片播放：轮播里的按钮、作品封面都走这一套
+   视频源写在自己页面里，脚本只负责打开 / 关闭 / 暂停。
+   ========================================================================== */
+(function () {
+  "use strict";
+
+  var triggers = Array.prototype.slice.call(document.querySelectorAll("[data-video]"));
+  var box = document.querySelector("[data-video-box]");
+  if (!triggers.length || !box) return;
+
+  var vid = box.querySelector("[data-video-el]");
+  var title = box.querySelector("[data-video-title]");
+  var cur = "";
+
+  function open(src, poster, name) {
+    if (!vid) return;
+    if (cur !== src) {
+      cur = src;
+      vid.setAttribute("poster", poster || "");
+      vid.src = src;
+      vid.load();
+    }
+    if (title) title.textContent = name || "";
+    box.classList.add("is-on");
+    box.setAttribute("aria-hidden", "false");
+    document.body.style.overflow = "hidden";
+    var p = vid.play();
+    if (p && p.catch) p.catch(function () {});
+  }
+
+  function close() {
+    box.classList.remove("is-on");
+    box.setAttribute("aria-hidden", "true");
+    document.body.style.overflow = "";
+    if (vid) vid.pause();
+  }
+
+  document.addEventListener("click", function (e) {
+    var t = e.target.closest("[data-video]");
+    if (t) {
+      open(
+        t.getAttribute("data-video"),
+        t.getAttribute("data-video-poster"),
+        t.getAttribute("data-video-title")
+      );
+      return;
+    }
+    if (e.target.closest("[data-video-close]")) return close();
+    if (e.target === box) return close();
+  });
+
+  document.addEventListener("keydown", function (e) {
+    if (!box.classList.contains("is-on")) return;
+    if (e.key === "Escape") close();
+  });
+})();
