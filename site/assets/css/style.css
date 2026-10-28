@@ -2410,8 +2410,8 @@ button {
 /* 人像 */
 .shots {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 14px;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
 }
 .shots figure {
   position: relative;
@@ -2434,12 +2434,17 @@ button {
   position: absolute;
   left: 0;
   bottom: 0;
-  padding: 5px 10px;
+  padding: 8px 14px;
   font-family: var(--num);
-  font-size: 10px;
-  letter-spacing: 1.6px;
+  font-size: 12px;
+  letter-spacing: 1.8px;
   color: rgba(245, 242, 236, 0.7);
   background: rgba(8, 9, 12, 0.66);
+}
+@media (max-width: 700px) {
+  .shots {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* 现场照 */
@@ -2568,9 +2573,6 @@ button {
   }
   .nav {
     gap: 22px;
-  }
-  .shots {
-    grid-template-columns: repeat(2, 1fr);
   }
   .certwall {
     grid-template-columns: repeat(2, 1fr);
@@ -3543,6 +3545,39 @@ button {
   transition: none;
 }
 
+/* 证书原件加大版：环面整体放大一档 */
+.cert-ring--big .ring__card {
+  flex: 0 0 360px;
+}
+.cert-ring--big .ring__img {
+  height: 310px;
+}
+.cert-ring--big.is-ring .ring-stage {
+  height: 560px;
+  perspective: 2200px;
+}
+.cert-ring--big.is-ring .ring-stage::after {
+  width: 1000px;
+  height: 150px;
+  margin-left: -500px;
+  bottom: 20px;
+}
+.cert-ring--big.is-ring .ring {
+  width: 470px;
+  height: 450px;
+  margin-left: -235px;
+  top: 46px;
+}
+.cert-ring--big.is-ring .ring__card {
+  display: flex;
+  flex-direction: column;
+}
+.cert-ring--big.is-ring .ring__img {
+  flex: 1;
+  height: auto;
+  min-height: 0;
+}
+
 .ring-foot {
   display: flex;
   align-items: center;
@@ -4027,7 +4062,7 @@ button {
 .hero--side .hero__photo {
   left: auto;
   width: 38%;
-  background-position: 50% 28%;
+  background-position: 50% var(--fy, 28%);
   filter: saturate(0.92) brightness(0.9);
   border-left: 1px solid rgba(245, 242, 236, 0.08);
 }
@@ -4061,21 +4096,24 @@ button {
 /* 红底那张：块的底色跟图里的红接上 */
 .hero--side--red .hero__photo {
   background-color: #d91926;
-  background-position: 50% 16%;
+  background-position: 50% var(--fy, 16%);
   filter: saturate(1.04) brightness(0.92);
 }
 .hero--side--red .hero__photo::after {
   background: linear-gradient(180deg, rgba(8, 9, 12, 0), rgba(8, 9, 12, 0.55) 78%, #08090c 100%);
 }
 @media (max-width: 860px) {
+  /* 竖图铺满整宽会被裁成横条、人脸掉出画面，这里按每页的人脸位置单独定位 */
   .hero--side .hero__photo {
     left: 0;
     width: 100%;
-    background-position: 50% 26%;
+    background-position: 50% var(--fy-n, 40%);
     border-left: 0;
   }
+  /* 红底那张是整幅插画，裁切只剩一张脸；底色与图里的红一致，改成整张放进来 */
   .hero--side--red .hero__photo {
-    background-position: 50% 14%;
+    background-size: contain;
+    background-position: 50% 100%;
   }
   .hero.hero--side.is-filled .hero__shade {
     background: linear-gradient(
@@ -4098,8 +4136,8 @@ button {
 }
 .films__row {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 18px;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 22px;
 }
 .film {
   display: block;
@@ -4140,8 +4178,8 @@ button {
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
-  width: 46px;
-  height: 46px;
+  width: 62px;
+  height: 62px;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -4151,8 +4189,8 @@ button {
   transition: background 0.25s var(--ease), border-color 0.25s var(--ease);
 }
 .film__play svg {
-  width: 11px;
-  height: 13px;
+  width: 15px;
+  height: 17px;
   margin-left: 2px;
 }
 .film:hover .film__play {
@@ -4162,13 +4200,13 @@ button {
 .film__meta {
   display: flex;
   align-items: baseline;
-  gap: 10px;
-  padding: 13px 15px 15px;
+  gap: 12px;
+  padding: 16px 18px 18px;
   border-top: 1px solid rgba(245, 242, 236, 0.07);
 }
 .film__meta b {
   font-family: var(--num);
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 400;
   letter-spacing: 1.5px;
   color: var(--red);
@@ -4176,20 +4214,15 @@ button {
 .film__meta em {
   flex: 1;
   font-style: normal;
-  font-size: 14px;
+  font-size: 16px;
   color: #f2efe9;
 }
 .film__meta i {
   font-family: var(--num);
   font-style: normal;
-  font-size: 11px;
+  font-size: 12px;
   letter-spacing: 1px;
   color: #8f939c;
-}
-@media (max-width: 1024px) {
-  .films__row {
-    grid-template-columns: repeat(2, 1fr);
-  }
 }
 @media (max-width: 560px) {
   .films__row {
