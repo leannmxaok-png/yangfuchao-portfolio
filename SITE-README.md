@@ -18,7 +18,7 @@
 ## 目录
 
 ```
-site/
+docs/
 ├─ index.html … friends.html
 ├─ assets/
 │  ├─ css/style.css     全站样式（设计变量集中在 :root）
@@ -41,7 +41,7 @@ python -m http.server 8080
 
 ## 上线
 
-整个 `site/` 目录原样上传即可，任意静态托管都行。四个免费方案的完整步骤见 `DEPLOY.md`。
+整个 `docs/` 目录原样上传即可，任意静态托管都行。四个免费方案的完整步骤见 `DEPLOY.md`。
 
 | 方案 | 地址 | 特点 |
 |---|---|---|
