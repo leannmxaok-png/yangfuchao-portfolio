@@ -2,7 +2,7 @@
 
 护理学本科，做短视频、海外账号与 AIGC 内容。站点是纯静态的 HTML + CSS + 原生 JS，没有构建步骤、没有后端。
 
-**在线预览**：https://yangfuchao-portfolio.app.workbuddy.host/?sharecode=QUETOGWFJZ
+**在线地址**：https://leannmxaok-png.github.io/yangfuchao-portfolio/ （GitHub Pages，主分支根目录直接发布）
 
 ---
 
