@@ -4727,3 +4727,28 @@ button {
     display: none;
   }
 }
+
+/* 能力卡现在能点：整块是链接，右上角浮出箭头 */
+a.cap {
+  color: inherit;
+  text-decoration: none;
+}
+.cap__go {
+  position: absolute;
+  right: 15px;
+  top: 13px;
+  font-size: 14px;
+  line-height: 1;
+  color: var(--red);
+  opacity: 0;
+  transform: translateX(-5px);
+  transition: opacity 0.25s var(--ease), transform 0.25s var(--ease);
+}
+a.cap:hover .cap__go {
+  opacity: 1;
+  transform: none;
+}
+/* 从能力卡跳过去时，别被固定头部挡住 */
+.tl__item {
+  scroll-margin-top: calc(var(--head-h) + 48px);
+}
