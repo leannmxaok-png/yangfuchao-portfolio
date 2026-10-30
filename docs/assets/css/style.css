@@ -1914,13 +1914,35 @@ button {
   color: var(--text-2);
   margin-bottom: 20px;
 }
+/* 三段自述：字号行距放开，左侧竖线分条，关键词提亮 */
 .intro p {
-  font-size: 14px;
+  position: relative;
+  max-width: 812px;
+  padding-left: 22px;
+  font-size: 16px;
   line-height: 1.95;
-  color: #9c9fa6;
+  color: #c9cdd6;
+  text-wrap: pretty;
+}
+.intro p::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 9px;
+  bottom: 9px;
+  width: 2px;
+  border-radius: 1px;
+  background: rgba(224, 36, 47, 0.42);
+}
+.intro p:first-of-type::before {
+  background: var(--red);
+}
+.intro p b {
+  font-weight: 600;
+  color: #ffffff;
 }
 .intro p + p {
-  margin-top: 16px;
+  margin-top: 24px;
 }
 .info-card {
   background: var(--card);
@@ -1928,9 +1950,9 @@ button {
   padding: 24px 22px;
 }
 .info-card__h {
-  font-size: 11px;
+  font-size: 12px;
   letter-spacing: 2px;
-  color: #7a7d84;
+  color: #8d9098;
   margin-bottom: 18px;
 }
 .info-row {
@@ -1947,14 +1969,15 @@ button {
   opacity: 0.8;
 }
 .info-row dt {
-  width: 62px;
+  width: 66px;
   flex: 0 0 auto;
-  font-size: 11px;
-  color: #6f7279;
+  font-size: 12px;
+  color: #85888f;
 }
 .info-row dd {
   margin: 0;
-  color: #edeae4;
+  font-size: 13.5px;
+  color: #f2efe9;
 }
 .info-div {
   height: 1px;
