@@ -1,17 +1,18 @@
 # Pages CMS 配置（pagescms.org 读取这个文件生成编辑界面）
 # 想加新字段：在 content/site.json 里加 key，再在下面加一条同名字段即可
 
+# 注意：仓库里站点放在 docs/ 目录，所以路径都带 docs 前缀
 media:
   - name: images
     label: 图片
-    input: assets/img
+    input: docs/assets/img
     output: /assets/img
 
 content:
   - name: site
     label: 网站文案
     type: file
-    path: content/site.json
+    path: docs/content/site.json
     fields:
       - name: hero
         label: 首页首屏
