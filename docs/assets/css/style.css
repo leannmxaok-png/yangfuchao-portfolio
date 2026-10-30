@@ -4664,3 +4664,66 @@ button {
 .film:hover .film__meta em {
   color: var(--red);
 }
+
+/* 荣誉条目里的小缩略卡：一眼看到有没有原件 */
+.award-thumb {
+  display: block;
+  width: 58px;
+  height: 43px;
+  flex: 0 0 auto;
+  overflow: hidden;
+  border: 1px solid #22242b;
+  background: #0d0e12;
+  transition: border-color 0.25s var(--ease);
+}
+.award-thumb img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: saturate(0.86) brightness(0.82);
+  transition: filter 0.25s var(--ease), transform 0.35s var(--ease);
+}
+.award-thumb.is-empty {
+  background: repeating-linear-gradient(
+    45deg,
+    #0d0e12 0 5px,
+    #131419 5px 10px
+  );
+  border-style: dashed;
+}
+.award-list li:hover .award-thumb,
+.award-list li.is-on .award-thumb {
+  border-color: rgba(224, 36, 47, 0.6);
+}
+.award-list li:hover .award-thumb img,
+.award-list li.is-on .award-thumb img {
+  filter: none;
+  transform: scale(1.06);
+}
+
+/* 手机上荣誉条目挤成三行，收成一行：缩略卡 + 年份 + 标题 */
+@media (max-width: 640px) {
+  .award-list .star {
+    display: none;
+  }
+  .award-list li {
+    gap: 12px;
+    padding: 14px 0;
+  }
+  .award-list b {
+    min-width: 34px;
+    font-size: 11px;
+  }
+  .award-thumb {
+    width: 46px;
+    height: 34px;
+  }
+  .award-list h3 {
+    font-size: 15px;
+    line-height: 1.5;
+  }
+  .award-list li p {
+    display: none;
+  }
+}
