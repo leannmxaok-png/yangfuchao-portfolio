@@ -710,9 +710,17 @@ button {
   text-decoration: none;
 }
 .work__play--arrow svg {
-  width: 16px;
-  height: 16px;
+  width: 15px;
+  height: 15px;
   margin-left: 0;
+}
+/* 这张卡的封面是数字排版，圆形按钮放中间会压住字，挪到左上角 */
+.work--link .work__play {
+  left: 20px;
+  top: 18px;
+  width: 38px;
+  height: 38px;
+  transform: none;
 }
 .work__body {
   padding: 22px 24px 24px;
@@ -947,6 +955,46 @@ button {
 /* 3D 动画画面整体偏亮，压一档再给字加投影才读得清 */
 .stage__slide--anim .stage__bg {
   filter: brightness(0.82) saturate(0.92);
+}
+/* 没有实拍底图的那几张：纯渐变 + 淡网格，靠文案和大数字撑 */
+.stage__bg--plain {
+  background: radial-gradient(
+      120% 92% at 76% 26%,
+      rgba(224, 36, 47, 0.3),
+      rgba(224, 36, 47, 0) 62%
+    ),
+    linear-gradient(150deg, #0a0b10 0%, #13151c 56%, #1d1418 100%);
+}
+/* 背景空，用巨型描边字撑一下版面 */
+.stage__bg--plain::before {
+  content: "TIKTOK";
+  position: absolute;
+  right: 2%;
+  top: 8%;
+  font-family: var(--num);
+  font-size: clamp(80px, 12vw, 176px);
+  letter-spacing: 7px;
+  line-height: 1;
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(247, 244, 239, 0.08);
+  pointer-events: none;
+}
+.stage__bg--plain::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: linear-gradient(
+      rgba(247, 244, 239, 0.035) 1px,
+      transparent 1px
+    ),
+    linear-gradient(90deg, rgba(247, 244, 239, 0.035) 1px, transparent 1px);
+  background-size: 84px 84px;
+  mask-image: radial-gradient(72% 72% at 32% 42%, #000 0%, transparent 78%);
+  -webkit-mask-image: radial-gradient(
+    72% 72% at 32% 42%,
+    #000 0%,
+    transparent 78%
+  );
 }
 .stage__slide--anim .stage__d {
   text-shadow: 0 1px 12px rgba(8, 9, 12, 0.85);
