@@ -5054,3 +5054,122 @@ a.cap:hover .cap__go {
     padding-left: 0;
   }
 }
+
+/* ---------- 35. 技能树开场动效 ---------- */
+.tree__root {
+  position: relative;
+}
+/* 光点：从根节点沿着竖干滑下来 */
+.tree__spark {
+  position: absolute;
+  left: 50%;
+  top: 100%;
+  width: 9px;
+  height: 9px;
+  margin: -4px 0 0 -4.5px;
+  border-radius: 50%;
+  background: #ff4049;
+  box-shadow: 0 0 0 4px rgba(224, 36, 47, 0.22), 0 0 22px 5px rgba(224, 36, 47, 0.55);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 3;
+}
+.tree.is-play .tree__spark {
+  animation: sparkRun 1.15s cubic-bezier(0.45, 0, 0.55, 1) 0.15s 1 both;
+}
+@keyframes sparkRun {
+  0% {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.5);
+  }
+  25% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  70% {
+    opacity: 1;
+    transform: translateY(28px) scale(1.05);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(34px) scale(1.4);
+  }
+}
+
+/* 未播放前先藏起来，播放时按顺序长出来 */
+.js .tree:not(.is-play) .tree__root span,
+.js .tree:not(.is-play) .tree__h,
+.js .tree:not(.is-play) .tree__leaf li {
+  opacity: 0;
+}
+.js .tree:not(.is-play) .tree__leaf li {
+  transform: translateY(9px);
+}
+.js .tree:not(.is-play) .tree__branches::before {
+  transform: scaleX(0);
+}
+.js .tree:not(.is-play) .tree__branch::before {
+  transform: scaleY(0);
+}
+
+.tree__branches::before {
+  transform-origin: 50% 50%;
+}
+.tree__branch::before {
+  transform-origin: 50% 0;
+}
+.tree.is-play .tree__root span {
+  opacity: 1;
+  transition: opacity 0.45s var(--ease) 0.1s;
+}
+.tree.is-play .tree__branches::before {
+  transform: scaleX(1);
+  transition: transform 0.55s var(--ease) 0.95s;
+}
+/* 三根枝条依次长出来 */
+.tree.is-play .tree__branch:nth-child(1)::before {
+  transform: scaleY(1);
+  transition: transform 0.26s var(--ease) 1.2s;
+}
+.tree.is-play .tree__branch:nth-child(2)::before {
+  transform: scaleY(1);
+  transition: transform 0.26s var(--ease) 1.36s;
+}
+.tree.is-play .tree__branch:nth-child(3)::before {
+  transform: scaleY(1);
+  transition: transform 0.26s var(--ease) 1.52s;
+}
+.tree.is-play .tree__branch:nth-child(1) .tree__h {
+  opacity: 1;
+  transition: opacity 0.4s var(--ease) 1.34s;
+}
+.tree.is-play .tree__branch:nth-child(2) .tree__h {
+  opacity: 1;
+  transition: opacity 0.4s var(--ease) 1.5s;
+}
+.tree.is-play .tree__branch:nth-child(3) .tree__h {
+  opacity: 1;
+  transition: opacity 0.4s var(--ease) 1.66s;
+}
+/* 叶子一个个冒出来（--d 由脚本按顺序写） */
+.tree.is-play .tree__leaf li {
+  opacity: 1;
+  transform: none;
+  transition: opacity 0.45s var(--ease) var(--d, 1.75s),
+    transform 0.45s var(--ease) var(--d, 1.75s);
+}
+@media (prefers-reduced-motion: reduce) {
+  .js .tree .tree__root span,
+  .js .tree .tree__h,
+  .js .tree .tree__leaf li {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  .js .tree .tree__branches::before,
+  .js .tree .tree__branch::before {
+    transform: none !important;
+  }
+  .tree__spark {
+    display: none;
+  }
+}

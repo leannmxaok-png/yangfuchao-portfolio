@@ -1108,3 +1108,35 @@
   window.addEventListener("resize", onScroll, { passive: true });
   update();
 })();
+
+/* ==========================================================================
+   技能树：进到这一屏时，一个光点顺着主干滑下来，枝条一节节长出来
+   ========================================================================== */
+(function () {
+  "use strict";
+
+  var tree = document.querySelector(".tree");
+  if (!tree) return;
+
+  var leaves = tree.querySelectorAll(".tree__leaf li");
+  Array.prototype.forEach.call(leaves, function (li, i) {
+    li.style.setProperty("--d", 1750 + i * 45 + "ms");
+  });
+
+  if (!("IntersectionObserver" in window)) {
+    tree.classList.add("is-play");
+    return;
+  }
+
+  var io = new IntersectionObserver(
+    function (entries) {
+      entries.forEach(function (en) {
+        if (!en.isIntersecting) return;
+        tree.classList.add("is-play");
+        io.disconnect();
+      });
+    },
+    { threshold: 0.2 }
+  );
+  io.observe(tree);
+})();
