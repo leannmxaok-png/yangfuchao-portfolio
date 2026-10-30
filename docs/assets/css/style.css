@@ -1784,8 +1784,8 @@ button {
 }
 .awards__grid {
   display: grid;
-  grid-template-columns: 1fr 400px;
-  gap: 64px;
+  grid-template-columns: 1fr 500px;
+  gap: 56px;
 }
 /* 右栏跟着清单走，长列表滚动时画面不空 */
 @media (min-width: 1001px) {
@@ -1846,15 +1846,98 @@ button {
   position: relative;
   padding: 1px;
   background: #23252d;
+  overflow: hidden;
 }
 .cert .ph {
   aspect-ratio: 400 / 380;
 }
-.cert__note {
+/* 右栏大图：跟着左栏 hover 换图 */
+.cert img {
+  display: block;
+  width: 100%;
+  height: auto;
+  transition: opacity 0.16s linear;
+}
+.cert img.is-fade {
+  opacity: 0;
+}
+.cert__empty {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  aspect-ratio: 4 / 3;
+  text-align: center;
+  background: repeating-linear-gradient(
+    45deg,
+    #0d0e12 0 10px,
+    #101116 10px 20px
+  );
+}
+.cert.is-empty img {
+  display: none;
+}
+.cert.is-empty .cert__empty {
+  display: flex;
+}
+.cert__empty b {
+  font-family: var(--serif);
+  font-size: 18px;
+  color: #c2c5cc;
+}
+.cert__empty span {
+  font-size: 12px;
+  color: #85888f;
+}
+.cert__cap {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 14px;
   margin-top: 14px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #171920;
+}
+.cert__cap span {
+  font-family: var(--serif);
+  font-size: 15px;
+  color: #f2efe9;
+}
+.cert__cap i {
+  font-style: normal;
+  font-size: 11px;
+  color: #6f7279;
+  white-space: nowrap;
+}
+.cert__note {
+  margin-top: 12px;
   font-size: 11px;
   letter-spacing: 0.5px;
   color: var(--muted-4);
+}
+/* 左栏当前选中的那条，左边亮一道 */
+.award-list li {
+  cursor: pointer;
+  position: relative;
+}
+.award-list li::before {
+  content: "";
+  position: absolute;
+  left: -18px;
+  top: 12px;
+  bottom: 12px;
+  width: 2px;
+  border-radius: 1px;
+  background: transparent;
+  transition: background 0.2s var(--ease);
+}
+.award-list li.is-on::before {
+  background: var(--red);
+}
+.award-list li:focus-visible {
+  outline: 1px solid rgba(224, 36, 47, 0.6);
+  outline-offset: 4px;
 }
 .honor-stat {
   display: grid;

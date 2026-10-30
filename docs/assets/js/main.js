@@ -985,3 +985,81 @@
     if (e.key === "Escape") close();
   });
 })();
+
+/* ==========================================================================
+   荣誉页：鼠标停在哪条，右边就换成哪张证书
+   窄屏没有 hover，点了直接开大图灯箱
+   ========================================================================== */
+(function () {
+  "use strict";
+
+  var list = document.querySelector("[data-cert-list]");
+  var panel = document.querySelector("[data-cert-panel]");
+  if (!list || !panel) return;
+
+  var img = panel.querySelector("[data-cert-img]");
+  var frame = panel.querySelector(".cert");
+  var empty = panel.querySelector("[data-cert-empty]");
+  var cap = panel.querySelector("[data-cert-cap]");
+  var items = Array.prototype.slice.call(list.children);
+  var cur = null;
+  var box = document.querySelector("[data-lightbox]");
+  var boxImg = document.querySelector("[data-lightbox-img]");
+
+  function isNarrow() {
+    return window.matchMedia && window.matchMedia("(max-width: 1000px)").matches;
+  }
+
+  function openBox(src, name) {
+    if (!box || !boxImg || !src) return;
+    boxImg.src = src;
+    boxImg.alt = name + " 证书";
+    box.classList.add("is-on");
+    box.setAttribute("aria-hidden", "false");
+    document.body.style.overflow = "hidden";
+  }
+
+  function show(li) {
+    if (li === cur) return;
+    cur = li;
+
+    var src = li.getAttribute("data-cert");
+    var name = li.getAttribute("data-name") || "";
+
+    items.forEach(function (x) {
+      x.classList.toggle("is-on", x === li);
+    });
+    if (cap) cap.textContent = name;
+
+    if (!src) {
+      frame.classList.add("is-empty");
+      return;
+    }
+    frame.classList.remove("is-empty");
+    if (img.getAttribute("src") === src) return;
+
+    img.classList.add("is-fade");
+    setTimeout(function () {
+      img.src = src;
+      img.alt = name + " 证书";
+      img.classList.remove("is-fade");
+    }, 130);
+  }
+
+  items.forEach(function (li) {
+    li.tabIndex = 0;
+    li.addEventListener("mouseenter", function () {
+      if (!isNarrow()) show(li);
+    });
+    li.addEventListener("focus", function () {
+      if (!isNarrow()) show(li);
+    });
+    li.addEventListener("click", function () {
+      if (isNarrow()) {
+        openBox(li.getAttribute("data-cert"), li.getAttribute("data-name"));
+      } else {
+        show(li);
+      }
+    });
+  });
+})();
