@@ -4796,3 +4796,55 @@ a.cap:hover .cap__go {
   color: #d2d5dc;
   border-color: #3b404a;
 }
+
+/* 经历页 · 项目实践卡：和其他卡片同一套悬停语言 */
+.proj {
+  transition: border-color 0.25s var(--ease), background 0.25s var(--ease),
+    transform 0.3s var(--ease);
+}
+.proj__t {
+  transition: color 0.25s var(--ease);
+}
+.proj__d {
+  font-size: 13px;
+  color: #a2a6af;
+  transition: color 0.25s var(--ease);
+}
+.proj__foot {
+  color: #9aa0aa;
+  transition: color 0.25s var(--ease);
+}
+.proj:hover {
+  background: #101218;
+  border-color: rgba(224, 36, 47, 0.55);
+  transform: translateY(-3px);
+}
+.proj:hover .proj__t {
+  color: var(--red);
+}
+.proj:hover .proj__d {
+  color: #e4e6eb;
+}
+.proj:hover .proj__foot {
+  color: #d7dae1;
+}
+.proj:hover .proj__tag {
+  border-color: rgba(224, 36, 47, 0.7);
+}
+
+/* 技能标签也点得亮：悬停变白、边框转红 */
+.skill-tags span {
+  transition: color 0.22s var(--ease), border-color 0.22s var(--ease),
+    background 0.22s var(--ease);
+}
+.skill-tags span:hover {
+  color: #ffffff;
+  border-color: rgba(224, 36, 47, 0.6);
+  background: rgba(224, 36, 47, 0.09);
+}
+.skill-group__h {
+  transition: color 0.25s var(--ease);
+}
+.skill-group:hover .skill-group__h {
+  color: var(--red);
+}
