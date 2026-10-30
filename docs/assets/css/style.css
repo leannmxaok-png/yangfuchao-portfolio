@@ -4848,3 +4848,174 @@ a.cap:hover .cap__go {
 .skill-group:hover .skill-group__h {
   color: var(--red);
 }
+
+/* ---------- 34. 技能树状图 ---------- */
+.tree {
+  position: relative;
+}
+.tree__root {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 11px;
+}
+.tree__root span {
+  position: relative;
+  padding-left: 18px;
+  font-size: 12px;
+  letter-spacing: 3px;
+  color: #d2d5dc;
+}
+.tree__root span::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 8px;
+  height: 8px;
+  margin-top: -4px;
+  border-radius: 50%;
+  background: var(--red);
+  box-shadow: 0 0 0 4px rgba(224, 36, 47, 0.14);
+}
+/* 根节点往下的竖干 */
+.tree__root::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 100%;
+  width: 1px;
+  height: 30px;
+  background: #2b2f37;
+}
+/* 三根主枝：一条横线 + 三个下垂点 */
+.tree__branches {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 44px;
+  margin-top: 30px;
+  padding-top: 34px;
+}
+.tree__branches::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 16.666%;
+  right: 16.666%;
+  height: 1px;
+  background: #2b2f37;
+}
+.tree__branch {
+  position: relative;
+}
+.tree__branch::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: -34px;
+  width: 1px;
+  height: 34px;
+  background: #2b2f37;
+  transition: background 0.25s var(--ease), box-shadow 0.25s var(--ease);
+}
+.tree__h {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-family: var(--serif);
+  font-weight: 700;
+  font-size: 16px;
+  letter-spacing: 1px;
+  color: var(--text-2);
+  transition: color 0.25s var(--ease);
+}
+.tree__h::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #3b404a;
+  transition: background 0.25s var(--ease), box-shadow 0.25s var(--ease);
+}
+/* 叶子挂在一根虚线上 */
+.tree__leaf {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 14px 0 0 2px;
+  padding-left: 14px;
+  border-left: 1px dashed #262a32;
+}
+.tree__leaf li {
+  padding: 7px 13px;
+  font-size: 12.5px;
+  color: #cfd1d6;
+  background: #101218;
+  border: 1px solid #1e2027;
+  border-radius: 2px;
+  transition: color 0.22s var(--ease), border-color 0.22s var(--ease),
+    background 0.22s var(--ease), transform 0.22s var(--ease);
+}
+.tree__leaf li:hover {
+  color: #ffffff;
+  border-color: rgba(224, 36, 47, 0.6);
+  background: rgba(224, 36, 47, 0.09);
+  transform: translateY(-2px);
+}
+/* 悬停整条枝：枝线转红、圆点发光、标题变红 */
+.tree__branch:hover::before {
+  background: rgba(224, 36, 47, 0.7);
+  box-shadow: 0 0 10px rgba(224, 36, 47, 0.45);
+}
+.tree__branch:hover .tree__h {
+  color: var(--red);
+}
+.tree__branch:hover .tree__h::before {
+  background: var(--red);
+  box-shadow: 0 0 0 3px rgba(224, 36, 47, 0.16);
+}
+/* 手机上竖过来：左侧一根主干，每个分支横着接出去 */
+@media (max-width: 860px) {
+  .tree__root {
+    justify-content: flex-start;
+  }
+  .tree__root::after {
+    left: 4px;
+    height: 24px;
+  }
+  .tree__branches {
+    grid-template-columns: 1fr;
+    gap: 0;
+    margin-top: 24px;
+    padding-top: 0;
+    padding-left: 4px;
+  }
+  .tree__branches::before {
+    left: 0;
+    right: auto;
+    top: 0;
+    width: 1px;
+    height: 100%;
+    background: #2b2f37;
+  }
+  .tree__branch {
+    padding: 0 0 26px 26px;
+  }
+  .tree__branch:last-child {
+    padding-bottom: 0;
+  }
+  .tree__branch::before {
+    left: 0;
+    top: 12px;
+    width: 26px;
+    height: 1px;
+  }
+  /* 手机上主干已经很清楚，叶子那根虚线去掉，别叠成一团 */
+  .tree__leaf {
+    border-left: 0;
+    padding-left: 0;
+  }
+}
