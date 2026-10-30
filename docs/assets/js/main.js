@@ -1160,12 +1160,64 @@
   "use strict";
 
   var KEY = "yfc-sfx";
-  var on = false;
+  var on = true;
   try {
-    on = localStorage.getItem(KEY) === "1";
+    var saved = localStorage.getItem(KEY);
+    on = saved === null ? true : saved === "1";
   } catch (e) {}
   var ctx = null;
   var btn = null;
+  var bgm = null;
+  var bgmWanted = false;
+
+  /* 背景音乐：默认开，但要等用户第一次动手（浏览器策略）才真正播 */
+  function bgmEl() {
+    if (bgm) return bgm;
+    bgm = new Audio("assets/audio/bgm.mp3");
+    bgm.loop = true;
+    bgm.preload = "none";
+    bgm.volume = 0;
+    return bgm;
+  }
+
+  function fadeBgm(to, ms) {
+    var a = bgmEl();
+    var from = a.volume;
+    var t0 = performance.now();
+    function step(now) {
+      var k = Math.min(1, (now - t0) / ms);
+      a.volume = from + (to - from) * k;
+      if (k < 1) requestAnimationFrame(step);
+      else if (to === 0) a.pause();
+    }
+    requestAnimationFrame(step);
+  }
+
+  function startBgm() {
+    if (!on) return;
+    var a = bgmEl();
+    bgmWanted = true;
+    var p = a.play();
+    if (p && p.then) p.then(function () { fadeBgm(0.32, 1400); }).catch(function () { bgmWanted = false; });
+    else fadeBgm(0.32, 1400);
+  }
+
+  function stopBgm() {
+    bgmWanted = false;
+    if (bgm) fadeBgm(0, 500);
+  }
+
+  /* 视频一播，先让音乐让路 */
+  document.addEventListener("click", function (e) {
+    if (!e.target.closest) return;
+    if (e.target.closest("[data-video], .stage__play, .vstrip__poster, .duo__play")) stopBgm();
+  }, true);
+  document.addEventListener("click", function (e) {
+    if (!e.target.closest) return;
+    if (e.target.closest("[data-video-close], .lightbox__x")) {
+      if (on && bgmWanted) startBgm();
+    }
+  }, true);
 
   function audio() {
     if (!ctx) {
@@ -1247,7 +1299,12 @@
         localStorage.setItem(KEY, on ? "1" : "0");
       } catch (e) {}
       paint();
-      if (on) blip(760, 0.13, 0.055, "sine", 1040);
+      if (on) {
+        blip(760, 0.13, 0.055, "sine", 1040);
+        startBgm();
+      } else {
+        stopBgm();
+      }
     });
   }
 
@@ -1285,6 +1342,18 @@
   } else {
     makeBtn();
   }
+
+  /* 浏览器不允许无交互自动播放，等第一次点击/按键就起 */
+  function firstTouch(e) {
+    /* 第一次就点视频的话别起音乐，等下一次真实交互 */
+    var t = e && e.target;
+    if (t && t.closest && t.closest("[data-video], .stage__play, .vstrip__poster, .duo__play")) return;
+    if (on) startBgm();
+    document.removeEventListener("pointerdown", firstTouch);
+    document.removeEventListener("keydown", firstTouch);
+  }
+  document.addEventListener("pointerdown", firstTouch, { passive: true });
+  document.addEventListener("keydown", firstTouch);
 })();
 
 /* ==========================================================================
@@ -1317,4 +1386,40 @@
       });
     })
     .catch(function () {});
+})();
+
+/* ==========================================================================
+   大段文字入场：从上往下逐行滑入（data-rise 的数字就是出场顺序）
+   ========================================================================== */
+(function () {
+  "use strict";
+
+  var els = Array.prototype.slice.call(document.querySelectorAll("[data-rise]"));
+  if (!els.length) return;
+
+  function show(el) {
+    var i = parseInt(el.getAttribute("data-rise"), 10) || 0;
+    el.style.setProperty("--rd", i * 115 + "ms");
+    el.classList.add("is-rise");
+  }
+
+  if (!("IntersectionObserver" in window)) {
+    els.forEach(show);
+    return;
+  }
+
+  var io = new IntersectionObserver(
+    function (entries) {
+      entries.forEach(function (en) {
+        if (!en.isIntersecting) return;
+        show(en.target);
+        io.unobserve(en.target);
+      });
+    },
+    { threshold: 0.15, rootMargin: "0px 0px -6% 0px" }
+  );
+
+  els.forEach(function (el) {
+    io.observe(el);
+  });
 })();

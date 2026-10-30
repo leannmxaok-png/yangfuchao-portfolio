@@ -5359,3 +5359,21 @@ a.cap:hover .cap__go {
   transform: scale(1.05);
   filter: brightness(0.95);
 }
+
+/* ---------- 38. 大段文字从上往下逐行滑入 ---------- */
+.js [data-rise] {
+  opacity: 0;
+  transform: translateY(-26px);
+}
+[data-rise].is-rise {
+  opacity: 1;
+  transform: none;
+  transition: opacity 0.8s var(--ease) var(--rd, 0s),
+    transform 0.8s var(--ease) var(--rd, 0s);
+}
+@media (prefers-reduced-motion: reduce) {
+  .js [data-rise] {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
