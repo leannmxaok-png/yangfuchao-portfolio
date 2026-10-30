@@ -371,20 +371,53 @@ button {
   justify-content: flex-start;
   padding-top: 64px;
 }
+/* 姓名牌：先让人知道这是谁，再读身份标签 */
+.hero__id {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  margin-bottom: 16px;
+}
+.hero__name {
+  position: relative;
+  padding-left: 15px;
+  font-family: var(--serif);
+  font-size: 25px;
+  font-weight: 500;
+  letter-spacing: 4px;
+  color: #f7f4ef;
+  text-shadow: 0 2px 18px rgba(0, 0, 0, 0.75);
+}
+.hero__name::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 3px;
+  height: 21px;
+  margin-top: -11px;
+  background: var(--red);
+}
+.hero__en {
+  font-family: var(--num);
+  font-size: 10px;
+  letter-spacing: 3.4px;
+  color: #aeb2ba;
+}
 .hero__meta {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 14px;
-  font-size: 11px;
-  letter-spacing: 1.4px;
-  color: var(--muted-2);
+  gap: 16px;
+  font-size: 13px;
+  letter-spacing: 1.8px;
+  color: #d7dae1;
   margin-bottom: 26px;
 }
 .hero__meta i {
-  width: 16px;
+  width: 18px;
   height: 1px;
-  background: #3a3d45;
+  background: #5a5e67;
   display: block;
 }
 .hero__title {
@@ -4291,5 +4324,22 @@ button {
     animation: none !important;
     transition: none !important;
     scroll-behavior: auto !important;
+  }
+}
+
+/* 手机上五个身份标签挤一行，别断成两行 */
+@media (max-width: 560px) {
+  .hero__meta {
+    font-size: 12px;
+    letter-spacing: 0.4px;
+    gap: 10px;
+  }
+  .hero__name {
+    font-size: 22px;
+    letter-spacing: 3px;
+  }
+  .hero__en {
+    font-size: 9px;
+    letter-spacing: 2.4px;
   }
 }
