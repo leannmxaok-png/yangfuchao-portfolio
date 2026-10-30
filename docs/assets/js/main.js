@@ -1063,3 +1063,48 @@
     });
   });
 })();
+
+/* ==========================================================================
+   时间轴：滚动时离视口中心最近的那条高亮，字放大、圆点亮起来
+   ========================================================================== */
+(function () {
+  "use strict";
+
+  var items = Array.prototype.slice.call(document.querySelectorAll(".tl__item"));
+  if (!items.length) return;
+
+  var active = null;
+  var ticking = false;
+
+  function update() {
+    ticking = false;
+    var mid = window.innerHeight * 0.46;
+    var best = null;
+    var bestD = 1e9;
+
+    items.forEach(function (el) {
+      var r = el.getBoundingClientRect();
+      if (r.bottom < 0 || r.top > window.innerHeight) return;
+      var d = Math.abs(r.top + r.height / 2 - mid);
+      if (d < bestD) {
+        bestD = d;
+        best = el;
+      }
+    });
+
+    if (best === active) return;
+    if (active) active.classList.remove("is-focus");
+    if (best) best.classList.add("is-focus");
+    active = best;
+  }
+
+  function onScroll() {
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(update);
+  }
+
+  window.addEventListener("scroll", onScroll, { passive: true });
+  window.addEventListener("resize", onScroll, { passive: true });
+  update();
+})();
