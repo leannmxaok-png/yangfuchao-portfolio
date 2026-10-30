@@ -1140,3 +1140,114 @@
   );
   io.observe(tree);
 })();
+
+/* ==========================================================================
+   交互音效：默认关闭，右下角喇叭开关，开了才响
+   声音全部用 Web Audio 现场合成，不加载任何音频文件
+   ========================================================================== */
+(function () {
+  "use strict";
+
+  var KEY = "yfc-sfx";
+  var on = false;
+  try {
+    on = localStorage.getItem(KEY) === "1";
+  } catch (e) {}
+  var ctx = null;
+  var btn = null;
+
+  function audio() {
+    if (!ctx) {
+      var AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) return null;
+      ctx = new AC();
+    }
+    if (ctx.state === "suspended") ctx.resume();
+    return ctx;
+  }
+
+  function blip(freq, dur, vol, type, slideTo) {
+    if (!on) return;
+    var ac = audio();
+    if (!ac) return;
+    var t = ac.currentTime;
+    var osc = ac.createOscillator();
+    var gain = ac.createGain();
+    osc.type = type || "sine";
+    osc.frequency.setValueAtTime(freq, t);
+    if (slideTo) osc.frequency.exponentialRampToValueAtTime(slideTo, t + dur);
+    gain.gain.setValueAtTime(0.0001, t);
+    gain.gain.linearRampToValueAtTime(vol, t + 0.006);
+    gain.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    osc.connect(gain);
+    gain.connect(ac.destination);
+    osc.start(t);
+    osc.stop(t + dur + 0.03);
+  }
+
+  function paint() {
+    if (!btn) return;
+    btn.classList.toggle("is-on", on);
+    btn.setAttribute("aria-pressed", on ? "true" : "false");
+    btn.setAttribute("aria-label", on ? "关闭音效" : "打开音效");
+  }
+
+  function makeBtn() {
+    btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "sfx-toggle";
+    btn.innerHTML =
+      '<svg viewBox="0 0 18 18" aria-hidden="true">' +
+      '<path d="M2.6 6.4 H5.2 L8.6 3.4 V14.6 L5.2 11.6 H2.6 Z"/>' +
+      '<path class="sfx-wave" d="M11.4 6.2 A3 3 0 0 1 11.4 11.8"/>' +
+      '<path class="sfx-wave" d="M13.2 4.4 A5.4 5.4 0 0 1 13.2 13.6"/>' +
+      '<path class="sfx-slash" d="M3 15 L15 3"/>' +
+      "</svg>";
+    document.body.appendChild(btn);
+    paint();
+
+    btn.addEventListener("click", function () {
+      on = !on;
+      try {
+        localStorage.setItem(KEY, on ? "1" : "0");
+      } catch (e) {}
+      paint();
+      if (on) blip(760, 0.13, 0.055, "sine", 1040);
+    });
+  }
+
+  /* 悬停：极轻的一下，只在高价值元素上响 */
+  document.addEventListener(
+    "pointerover",
+    function (e) {
+      if (!on || !e.target.closest) return;
+      var el = e.target.closest(
+        "a, button, .work, .cap, .proj, .film, .dir, .stat, .slice, .life-card, .tree__branch, .award-list li"
+      );
+      if (!el || el.__sfxOn) return;
+      el.__sfxOn = 1;
+      setTimeout(function () {
+        el.__sfxOn = 0;
+      }, 420);
+      blip(1320, 0.03, 0.014, "triangle");
+    },
+    true
+  );
+
+  /* 点击：一声短促的"嗒" */
+  document.addEventListener(
+    "click",
+    function (e) {
+      if (!on || !e.target.closest) return;
+      if (!e.target.closest("a, button, .work__cover, .life-card")) return;
+      blip(560, 0.085, 0.05, "sine", 372);
+    },
+    true
+  );
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", makeBtn);
+  } else {
+    makeBtn();
+  }
+})();
