@@ -4206,7 +4206,7 @@ button {
   font-size: 10px;
   letter-spacing: 1.2px;
   color: #f5f2ec;
-  background: rgba(8, 9, 12, 0.72);
+  background: rgba(8, 9, 12, 0.84);
   border: 1px solid rgba(245, 242, 236, 0.18);
   border-radius: 2px;
 }
@@ -5284,77 +5284,77 @@ a.cap:hover .cap__go {
   border-color: rgba(224, 36, 47, 0.6);
 }
 
-/* ---------- 37. 影像记录：悬停时说明从上方流下来 ---------- */
+/* ---------- 37. 影像记录：说明做成常驻横向流动条 ---------- */
 .shots figure {
   cursor: default;
 }
-/* 毛玻璃条：不再用一大块黑渐变盖住图，改成半透明模糊条，图片还能透出来 */
-.shot__note {
+/* 顶部一条半透明条，文字从左往右不停流动，鼠标放上去也不停 */
+.shot__ticker {
   position: absolute;
   left: 0;
   right: 0;
   top: 0;
-  padding: 18px 20px 20px 22px;
-  background: rgba(10, 11, 15, 0.52);
-  border-bottom: 1px solid rgba(247, 244, 239, 0.14);
-  backdrop-filter: blur(18px) saturate(1.15);
-  -webkit-backdrop-filter: blur(18px) saturate(1.15);
-  transform: translateY(-100%);
-  transition: transform 0.5s cubic-bezier(0.22, 0.75, 0.3, 1);
+  overflow: hidden;
+  padding: 7px 0 8px;
+  background: rgba(8, 9, 12, 0.84);
+  border-bottom: 1px solid rgba(247, 244, 239, 0.1);
+  backdrop-filter: blur(16px) saturate(0.95);
+  -webkit-backdrop-filter: blur(16px) saturate(0.95);
   pointer-events: none;
+  /* 左右两端淡出，字不会硬切 */
+  mask-image: linear-gradient(90deg, transparent 0, #000 6%, #000 94%, transparent 100%);
+  -webkit-mask-image: linear-gradient(
+    90deg,
+    transparent 0,
+    #000 6%,
+    #000 94%,
+    transparent 100%
+  );
 }
-/* 左边一根红线，给这条玻璃一个锚点 */
-.shot__note::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  top: 14px;
-  bottom: 14px;
-  width: 2px;
-  border-radius: 1px;
-  background: var(--red);
+.shot__ticker-in {
+  display: flex;
+  width: max-content;
+  animation: shotTicker 26s linear infinite;
+  will-change: transform;
 }
-/* 老浏览器不支持模糊时，加厚背景保证可读 */
-@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-  .shot__note {
-    background: rgba(10, 11, 15, 0.9);
+.shot__ticker-in span {
+  display: block;
+  padding-right: 72px;
+  font-size: 12px;
+  line-height: 1.6;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+  color: #d7dae1;
+}
+.shots figure:nth-child(2) .shot__ticker-in {
+  animation-duration: 31s;
+}
+.shots figure:nth-child(3) .shot__ticker-in {
+  animation-duration: 22s;
+}
+.shots figure:nth-child(4) .shot__ticker-in {
+  animation-duration: 34s;
+}
+@keyframes shotTicker {
+  from {
+    transform: translateX(-50%);
+  }
+  to {
+    transform: translateX(0);
   }
 }
-.shots figure:hover .shot__note,
-.shots figure:focus-within .shot__note {
-  transform: translateY(0);
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .shot__ticker {
+    background: rgba(8, 9, 12, 0.9);
+  }
 }
-.shot__note p {
-  margin: 0;
-  font-family: var(--serif);
-  font-size: 15px;
-  font-weight: 700;
-  letter-spacing: 0.5px;
-  color: #ffffff;
-  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.6);
-  opacity: 0;
-  transform: translateY(-8px);
-  transition: opacity 0.45s var(--ease) 0.14s, transform 0.45s var(--ease) 0.14s;
+@media (prefers-reduced-motion: reduce) {
+  .shot__ticker-in {
+    animation: none;
+    transform: none;
+  }
 }
-.shot__note span {
-  display: block;
-  margin-top: 10px;
-  font-size: 12.5px;
-  line-height: 1.85;
-  color: #d2d5dc;
-  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.55);
-  opacity: 0;
-  transform: translateY(-8px);
-  transition: opacity 0.45s var(--ease) 0.26s, transform 0.45s var(--ease) 0.26s;
-}
-.shots figure:hover .shot__note p,
-.shots figure:hover .shot__note span,
-.shots figure:focus-within .shot__note p,
-.shots figure:focus-within .shot__note span {
-  opacity: 1;
-  transform: none;
-}
-/* 悬停时图片稍微压暗，文字更清楚 */
+/* 悬停时图片轻微放大（说明条继续滚，不暂停） */
 .shots figure:hover img {
   transform: scale(1.05);
   filter: brightness(0.95);
