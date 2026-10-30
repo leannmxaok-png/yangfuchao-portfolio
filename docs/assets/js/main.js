@@ -1488,9 +1488,10 @@
     }
     /* 先让它以半透明状态出现，再扫 */
     el.classList.add("is-swept");
+    var big = el.classList.contains("hero__title") || el.classList.contains("page-title");
     setTimeout(function () {
       el.classList.add("is-done");
-    }, 1650);
+    }, big ? 1900 : 1650);
   }
 
   if (!("IntersectionObserver" in window)) {
@@ -1502,10 +1503,11 @@
     function (entries) {
       entries.forEach(function (en) {
         if (!en.isIntersecting) return;
-        /* 稍微延后一点，等首屏 hero 自己的入场动画先走完 */
+        /* data-sweep 的值就是延迟毫秒数，让标题等 hero 的入场动画先走完 */
+        var d = parseInt(en.target.getAttribute("data-sweep"), 10);
         setTimeout(function () {
           run(en.target);
-        }, 260);
+        }, isNaN(d) ? 260 : d);
         io.unobserve(en.target);
       });
     },

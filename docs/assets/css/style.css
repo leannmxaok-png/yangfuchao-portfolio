@@ -5527,3 +5527,76 @@ a.cap:hover .cap__go {
     width: 66px;
   }
 }
+
+/* 大标题被"刮"出来的显影慢一点，笔画多 */
+.hero__title[data-sweep],
+.page-title[data-sweep] {
+  transition: background-position 1.85s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+/* 火花：光点后面拖几粒火星，像刀刮过地面溅起来的 */
+.hero__spark::before,
+.hero__spark::after {
+  content: "";
+  position: absolute;
+  border-radius: 50%;
+  background: #ffd9a8;
+  box-shadow: 0 0 7px 2px rgba(255, 150, 90, 0.85);
+  opacity: 0;
+}
+.hero__spark::before {
+  width: 3px;
+  height: 3px;
+  left: 46%;
+  top: -2px;
+  animation: sparkFlyA 0.75s ease-out infinite;
+}
+.hero__spark::after {
+  width: 2px;
+  height: 2px;
+  left: 58%;
+  top: 2px;
+  animation: sparkFlyB 0.95s ease-out infinite 0.18s;
+}
+@keyframes sparkFlyA {
+  0% {
+    opacity: 0;
+    transform: translate(0, 0) scale(0.6);
+  }
+  25% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(18px, -16px) scale(0.2);
+  }
+}
+@keyframes sparkFlyB {
+  0% {
+    opacity: 0;
+    transform: translate(0, 0) scale(0.6);
+  }
+  25% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-14px, 12px) scale(0.2);
+  }
+}
+/* 副标题、介绍文字悬停轻微放大提亮 */
+.hero__sub,
+.page-sub {
+  transform-origin: left top;
+  transition: color 0.22s var(--ease), transform 0.28s var(--ease);
+}
+.hero__sub:hover,
+.page-sub:hover {
+  color: #ffffff;
+  transform: scale(1.02);
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero__spark::before,
+  .hero__spark::after {
+    display: none;
+  }
+}
