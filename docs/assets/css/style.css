@@ -5293,13 +5293,10 @@ a.cap:hover .cap__go {
   position: absolute;
   left: 0;
   right: 0;
-  top: 0;
+  bottom: 40px;
   overflow: hidden;
-  padding: 7px 0 8px;
-  background: rgba(8, 9, 12, 0.84);
-  border-bottom: 1px solid rgba(247, 244, 239, 0.1);
-  backdrop-filter: blur(16px) saturate(0.95);
-  -webkit-backdrop-filter: blur(16px) saturate(0.95);
+  padding: 6px 0 8px;
+  background: none;
   pointer-events: none;
   /* 左右两端淡出，字不会硬切 */
   mask-image: linear-gradient(90deg, transparent 0, #000 6%, #000 94%, transparent 100%);
@@ -5320,11 +5317,17 @@ a.cap:hover .cap__go {
 .shot__ticker-in span {
   display: block;
   padding-right: 72px;
-  font-size: 12px;
+  font-size: 12.5px;
   line-height: 1.6;
   letter-spacing: 0.3px;
   white-space: nowrap;
-  color: #d7dae1;
+  color: #ffffff;
+  /* 八方向投影当描边，比 text-stroke 稳，浅色图上也能读 */
+  text-shadow: -1px -1px 0 rgba(0, 0, 0, 0.9), 1px -1px 0 rgba(0, 0, 0, 0.9),
+    -1px 1px 0 rgba(0, 0, 0, 0.9), 1px 1px 0 rgba(0, 0, 0, 0.9),
+    0 -1px 0 rgba(0, 0, 0, 0.9), 0 1px 0 rgba(0, 0, 0, 0.9),
+    -1px 0 0 rgba(0, 0, 0, 0.9), 1px 0 0 rgba(0, 0, 0, 0.9),
+    0 2px 10px rgba(0, 0, 0, 0.85);
 }
 .shots figure:nth-child(2) .shot__ticker-in {
   animation-duration: 31s;
@@ -5341,11 +5344,6 @@ a.cap:hover .cap__go {
   }
   to {
     transform: translateX(0);
-  }
-}
-@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-  .shot__ticker {
-    background: rgba(8, 9, 12, 0.9);
   }
 }
 @media (prefers-reduced-motion: reduce) {
@@ -5375,5 +5373,157 @@ a.cap:hover .cap__go {
   .js [data-rise] {
     opacity: 1 !important;
     transform: none !important;
+  }
+}
+
+/* ---------- 39. 顶部小字：光点扫过从左到右渐显 ---------- */
+.hero__meta {
+  position: relative;
+}
+/* 扫过的光点 */
+.hero__spark {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 150px;
+  height: 4px;
+  margin-top: -2px;
+  border-radius: 2px;
+  pointer-events: none;
+  opacity: 0;
+  background: radial-gradient(
+    50% 50% at 50% 50%,
+    rgba(255, 130, 118, 0.95) 0%,
+    rgba(224, 36, 47, 0.55) 45%,
+    rgba(224, 36, 47, 0) 72%
+  );
+  filter: blur(1.2px);
+  z-index: 2;
+}
+.hero__meta.is-swept .hero__spark {
+  animation: sparkSweep 1.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+@keyframes sparkSweep {
+  0% {
+    opacity: 0;
+    transform: translateX(-40px);
+  }
+  14% {
+    opacity: 1;
+  }
+  86% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(var(--spark-w, 620px));
+  }
+}
+
+/* 文字整体从左到右显影 */
+@supports ((-webkit-background-clip: text) or (background-clip: text)) {
+  .js [data-sweep] {
+    background-image: linear-gradient(
+      90deg,
+      #ffffff 0%,
+      #ffffff 52%,
+      rgba(255, 255, 255, 0.12) 52%,
+      rgba(255, 255, 255, 0.12) 100%
+    );
+    background-size: 210% 100%;
+    background-position: 100% 0;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+    transition: background-position 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  [data-sweep].is-swept {
+    background-position: 0 0;
+  }
+  /* 扫完之后恢复原本的填充色，别一直半透明白 */
+  [data-sweep].is-done {
+    background-image: none;
+    -webkit-text-fill-color: currentColor;
+    color: inherit;
+  }
+}
+
+/* 首页那五个身份标签：单个悬停放大 */
+.hero__meta > span {
+  display: inline-block;
+  transition: color 0.22s var(--ease), transform 0.22s var(--ease);
+}
+.hero__meta > span:hover {
+  color: #ffffff;
+  transform: translateY(-1px) scale(1.1);
+}
+@media (prefers-reduced-motion: reduce) {
+  .js [data-sweep] {
+    background-image: none !important;
+    -webkit-text-fill-color: currentColor !important;
+    color: inherit !important;
+  }
+  .hero__spark {
+    display: none;
+  }
+}
+
+/* ---------- 40. 音量滑块 ---------- */
+.vol {
+  position: fixed;
+  right: 74px;
+  bottom: 32px;
+  z-index: 119;
+  width: 78px;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(6px);
+  transition: opacity 0.25s var(--ease), transform 0.25s var(--ease);
+}
+.sfx-toggle.is-on ~ .vol,
+.vol:hover,
+.vol:focus-within {
+  opacity: 1;
+  pointer-events: auto;
+  transform: none;
+}
+.vol input {
+  -webkit-appearance: none;
+  appearance: none;
+  display: block;
+  width: 100%;
+  height: 3px;
+  border-radius: 3px;
+  background: #3b404a;
+  outline: none;
+  cursor: pointer;
+}
+.vol input::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: var(--red);
+  border: 0;
+  box-shadow: 0 0 0 3px rgba(224, 36, 47, 0.18);
+  transition: box-shadow 0.2s var(--ease);
+}
+.vol input::-webkit-slider-thumb:hover {
+  box-shadow: 0 0 0 5px rgba(224, 36, 47, 0.26);
+}
+.vol input::-moz-range-thumb {
+  width: 11px;
+  height: 11px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--red);
+}
+@media (max-width: 560px) {
+  .vol {
+    right: 62px;
+    bottom: 24px;
+    width: 66px;
   }
 }

@@ -1169,6 +1169,16 @@
   var btn = null;
   var bgm = null;
   var bgmWanted = false;
+  var volLevel = 0.32;
+  try {
+    var sv = localStorage.getItem("yfc-vol");
+    if (sv !== null) volLevel = Math.max(0, Math.min(1, parseFloat(sv)));
+  } catch (e) {}
+  /* 换页时接着上一页的进度播 */
+  var resumeAt = 0;
+  try {
+    resumeAt = parseFloat(sessionStorage.getItem("yfc-bgm-t") || "0") || 0;
+  } catch (e) {}
 
   /* 背景音乐：默认开，但要等用户第一次动手（浏览器策略）才真正播 */
   function bgmEl() {
@@ -1198,8 +1208,16 @@
     var a = bgmEl();
     bgmWanted = true;
     var p = a.play();
-    if (p && p.then) p.then(function () { fadeBgm(0.32, 1400); }).catch(function () { bgmWanted = false; });
-    else fadeBgm(0.32, 1400);
+    var after = function () {
+      if (resumeAt > 0) {
+        try {
+          a.currentTime = resumeAt;
+        } catch (e) {}
+      }
+      fadeBgm(volLevel, 1400);
+    };
+    if (p && p.then) p.then(after).catch(function () { bgmWanted = false; });
+    else after();
   }
 
   function stopBgm() {
@@ -1293,6 +1311,25 @@
     document.body.appendChild(btn);
     paint();
 
+    /* 音量滑块：开声音后浮在开关左边 */
+    var volBox = document.createElement("div");
+    volBox.className = "vol";
+    volBox.innerHTML =
+      '<input type="range" min="0" max="100" step="1" aria-label="背景音乐音量" value="' +
+      Math.round(volLevel * 100) +
+      '" />';
+    document.body.appendChild(volBox);
+    var slider = volBox.querySelector("input");
+    slider.addEventListener("input", function () {
+      volLevel = slider.value / 100;
+      try {
+        localStorage.setItem("yfc-vol", String(volLevel));
+      } catch (e) {}
+      if (bgm && !bgm.paused) {
+        bgm.volume = volLevel;
+      }
+    });
+
     btn.addEventListener("click", function () {
       on = !on;
       try {
@@ -1354,6 +1391,16 @@
   }
   document.addEventListener("pointerdown", firstTouch, { passive: true });
   document.addEventListener("keydown", firstTouch);
+
+  /* 离开页面前把播放进度记下来 */
+  function saveBgm() {
+    try {
+      if (bgm) sessionStorage.setItem("yfc-bgm-t", String(bgm.currentTime));
+      sessionStorage.setItem("yfc-bgm-play", bgmWanted ? "1" : "0");
+    } catch (e) {}
+  }
+  window.addEventListener("pagehide", saveBgm);
+  window.addEventListener("beforeunload", saveBgm);
 })();
 
 /* ==========================================================================
@@ -1417,6 +1464,52 @@
       });
     },
     { threshold: 0.15, rootMargin: "0px 0px -6% 0px" }
+  );
+
+  els.forEach(function (el) {
+    io.observe(el);
+  });
+})();
+
+/* ==========================================================================
+   顶部小字扫描：进页面时一道光从左边扫到右边，字跟着亮起来
+   ========================================================================== */
+(function () {
+  "use strict";
+
+  var els = Array.prototype.slice.call(document.querySelectorAll("[data-sweep]"));
+  if (!els.length) return;
+
+  function run(el) {
+    if (el.classList.contains("is-swept")) return;
+    var spark = el.querySelector(".hero__spark");
+    if (spark) {
+      el.style.setProperty("--spark-w", el.offsetWidth + "px");
+    }
+    /* 先让它以半透明状态出现，再扫 */
+    el.classList.add("is-swept");
+    setTimeout(function () {
+      el.classList.add("is-done");
+    }, 1650);
+  }
+
+  if (!("IntersectionObserver" in window)) {
+    els.forEach(run);
+    return;
+  }
+
+  var io = new IntersectionObserver(
+    function (entries) {
+      entries.forEach(function (en) {
+        if (!en.isIntersecting) return;
+        /* 稍微延后一点，等首屏 hero 自己的入场动画先走完 */
+        setTimeout(function () {
+          run(en.target);
+        }, 260);
+        io.unobserve(en.target);
+      });
+    },
+    { threshold: 0.4 }
   );
 
   els.forEach(function (el) {
