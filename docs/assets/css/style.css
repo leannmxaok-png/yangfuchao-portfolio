@@ -2275,11 +2275,26 @@ button {
   color: var(--red);
 }
 .tel {
-  margin-top: 14px;
+  display: flex;
+  width: max-content;
+  align-items: baseline;
+  gap: 12px;
+  margin-top: 16px;
   font-family: var(--num);
-  font-size: 18px;
+  font-size: 26px;
   letter-spacing: 2px;
-  color: #b0b3ba;
+  color: #f2efe9;
+  text-decoration: none;
+  transition: color 0.2s var(--ease);
+}
+.tel span {
+  font-family: var(--sans, inherit);
+  font-size: 11px;
+  letter-spacing: 2px;
+  color: #85888f;
+}
+.tel:hover {
+  color: var(--red);
 }
 .contact-block__note {
   margin-top: 10px;
@@ -4035,17 +4050,6 @@ button {
   background: rgba(8, 9, 12, 0.55);
   border: 1px solid rgba(247, 244, 239, 0.14);
 }
-.life-card__ai {
-  position: absolute;
-  right: 10px;
-  top: 10px;
-  padding: 2px 7px;
-  font-size: 10px;
-  letter-spacing: 1px;
-  color: #fff;
-  background: rgba(224, 36, 47, 0.86);
-}
-
 /* 大图浏览：左右翻页 + 底部计数 */
 .lightbox--nav img {
   max-width: min(1180px, 94vw);
@@ -4285,7 +4289,7 @@ button {
 /* 竖版原图铺满宽屏会被裁得只剩一条，改成右侧一块竖着放 */
 .hero--side .hero__photo {
   left: auto;
-  width: 38%;
+  width: 42%;
   background-position: 50% var(--fy, 28%);
   filter: saturate(0.92) brightness(0.9);
   border-left: 1px solid rgba(245, 242, 236, 0.08);
@@ -4306,10 +4310,9 @@ button {
   background: linear-gradient(
     90deg,
     #06070a 0%,
-    #06070a 52%,
-    rgba(6, 7, 10, 0.55) 64%,
-    rgba(6, 7, 10, 0.12) 80%,
-    rgba(6, 7, 10, 0.32) 100%
+    #06070a 54%,
+    rgba(6, 7, 10, 0.42) 60%,
+    rgba(6, 7, 10, 0) 70%
   );
 }
 .hero--side .hero__hand {
