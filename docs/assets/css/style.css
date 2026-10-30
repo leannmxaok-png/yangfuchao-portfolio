@@ -709,18 +709,30 @@ button {
   color: inherit;
   text-decoration: none;
 }
-.work__play--arrow svg {
+/* 只能跳转、不能播的卡：左上角一个箭头，别用播放圈的造型 */
+.work__go {
+  position: absolute;
+  left: 14px;
+  top: 12px;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(11, 13, 18, 0.72);
+  border: 1px solid rgba(245, 242, 236, 0.28);
+  border-radius: 50%;
+  transition: background 0.25s var(--ease), border-color 0.25s var(--ease),
+    transform 0.25s var(--ease);
+}
+.work__go svg {
   width: 15px;
   height: 15px;
-  margin-left: 0;
 }
-/* 这张卡的封面是数字排版，圆形按钮放中间会压住字，挪到左上角 */
-.work--link .work__play {
-  left: 20px;
-  top: 18px;
-  width: 38px;
-  height: 38px;
-  transform: none;
+.work--link:hover .work__go {
+  background: var(--red);
+  border-color: var(--red);
+  transform: translateX(3px);
 }
 .work__body {
   padding: 22px 24px 24px;
