@@ -4778,25 +4778,30 @@ a.cap:hover .cap__go {
   transition: color 0.3s var(--ease), border-color 0.3s var(--ease),
     font-size 0.3s var(--ease);
 }
+/* 焦点条标题直接转红，比"变白"明显得多 */
 .tl__item.is-focus .tl__body h3 {
-  color: #ffffff;
+  color: var(--red);
   font-size: 23px;
   letter-spacing: 0.6px;
 }
 .tl__item.is-focus .tl__body h3 em {
-  color: #d7dae1;
+  color: #ff9ba0;
 }
 .tl__item.is-focus .tl__d {
-  color: #e4e6eb;
+  color: #f4f5f8;
   font-size: 13.6px;
 }
-.tl__item.is-focus .tl__when b {
+.tl__item.is-focus .tl__d .hl {
   color: #ffffff;
+}
+.tl__item.is-focus .tl__when b {
+  color: #ff6b73;
   font-size: 13.2px;
 }
 .tl__item.is-focus .tl__when span {
   color: #ffffff;
-  border-color: rgba(224, 36, 47, 0.55);
+  border-color: rgba(224, 36, 47, 0.7);
+  background: rgba(224, 36, 47, 0.12);
 }
 .tl__item.is-focus .tl__dot {
   background: var(--red);
