@@ -1,0 +1,49 @@
+# Pages CMS 配置（pagescms.org 读取这个文件生成编辑界面）
+# 想加新字段：在 content/site.json 里加 key，再在下面加一条同名字段即可
+
+media:
+  - name: images
+    label: 图片
+    input: assets/img
+    output: /assets/img
+
+content:
+  - name: site
+    label: 网站文案
+    type: file
+    path: content/site.json
+    fields:
+      - name: hero
+        label: 首页首屏
+        type: object
+        fields:
+          - name: title
+            label: 主标题
+            type: text
+            description: 可以用 <br> 换行，<em>…</em> 包住的字会变成红色毛笔字
+          - name: sub
+            label: 副标题（三行）
+            type: text
+            description: 用 <br> 分行
+          - name: quote
+            label: 右下角那句话
+            type: text
+            description: 用 <br> 分行
+
+      - name: about
+        label: 关于我 · 自述四段
+        type: object
+        fields:
+          - name: h2
+            label: 标题
+            type: string
+          - name: p1
+            label: 第一段
+            type: text
+            description: 用 <b>…</b> 包住要变白加粗的关键词
+          - name: p2
+            label: 第二段
+            type: text
+          - name: p3
+            label: 第三段
+            type: text

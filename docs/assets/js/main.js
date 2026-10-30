@@ -1286,3 +1286,35 @@
     makeBtn();
   }
 })();
+
+/* ==========================================================================
+   文案热更新：读 content/site.json，把带 data-t 的元素覆盖掉
+   JSON 读不到就保持 HTML 里的原文，不影响访问
+   ========================================================================== */
+(function () {
+  "use strict";
+
+  if (location.protocol === "file:") return; /* 本地直接开文件时不折腾 */
+
+  var nodes = document.querySelectorAll("[data-t]");
+  if (!nodes.length || !window.fetch) return;
+
+  function pick(obj, path) {
+    return path.split(".").reduce(function (o, k) {
+      return o && typeof o === "object" ? o[k] : undefined;
+    }, obj);
+  }
+
+  fetch("content/site.json", { cache: "no-cache" })
+    .then(function (r) {
+      return r.ok ? r.json() : null;
+    })
+    .then(function (data) {
+      if (!data) return;
+      Array.prototype.forEach.call(nodes, function (el) {
+        var v = pick(data, el.getAttribute("data-t"));
+        if (typeof v === "string" && v.trim()) el.innerHTML = v;
+      });
+    })
+    .catch(function () {});
+})();
