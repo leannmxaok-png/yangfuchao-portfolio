@@ -2229,37 +2229,41 @@ button {
 
 /* ---------- 18. 联系 ---------- */
 .directions {
-  padding: 52px 0 0;
+  padding: 64px 0 0;
 }
 .directions__grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
+  gap: 20px;
 }
 .dir {
-  padding: 22px 20px;
+  display: flex;
+  flex-direction: column;
+  min-height: 210px;
+  padding: 30px 28px 32px;
   border: 1px solid #1b1d23;
   background: #0b0c10;
 }
 .dir__n {
   font-family: var(--num);
-  font-size: 11px;
-  letter-spacing: 2px;
+  font-size: 12px;
+  letter-spacing: 2.4px;
   color: var(--red);
 }
-.dir h3 {
-  margin-top: 10px;
+.dir h2 {
+  margin: 16px 0 0;
   font-family: var(--serif);
   font-weight: 700;
-  font-size: 20px;
+  font-size: 27px;
+  line-height: 1.2;
   letter-spacing: 1px;
-  color: var(--text-2);
+  color: #f7f4ef;
 }
 .dir p {
-  margin-top: 8px;
-  font-size: 12px;
-  line-height: 1.8;
-  color: var(--muted-2);
+  margin: 12px 0 0;
+  font-size: 14.5px;
+  line-height: 1.85;
+  color: #b6bac1;
 }
 .contact-block {
   margin-top: 52px;
@@ -4610,12 +4614,10 @@ button {
   transition: border-color 0.25s var(--ease), background 0.25s var(--ease),
     transform 0.3s var(--ease);
 }
-.dir h3 {
+.dir h2 {
   transition: color 0.25s var(--ease);
 }
 .dir p {
-  font-size: 12.5px;
-  color: #a2a6af;
   transition: color 0.25s var(--ease);
 }
 .dir:hover {
@@ -4623,7 +4625,7 @@ button {
   background: #101218;
   transform: translateY(-3px);
 }
-.dir:hover h3 {
+.dir:hover h2 {
   color: var(--red);
 }
 .dir:hover p {
@@ -5171,5 +5173,20 @@ a.cap:hover .cap__go {
   }
   .tree__spark {
     display: none;
+  }
+}
+
+/* 手机上方向卡内容少，别硬撑 210 高 */
+@media (max-width: 860px) {
+  .dir {
+    min-height: 0;
+    padding: 24px 22px 26px;
+  }
+  .dir h2 {
+    margin-top: 12px;
+    font-size: 24px;
+  }
+  .dir p {
+    font-size: 14px;
   }
 }
