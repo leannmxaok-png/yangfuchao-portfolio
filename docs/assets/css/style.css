@@ -2019,25 +2019,62 @@ button {
   grid-template-columns: repeat(4, 1fr);
   gap: 24px;
 }
+.slice {
+  position: relative;
+  padding-top: 20px;
+  transition: transform 0.3s var(--ease);
+}
+/* 顶部细线，hover 时变红，给个"点亮"的落点 */
+.slice::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 1px;
+  background: var(--line);
+  transition: background 0.3s var(--ease), box-shadow 0.3s var(--ease);
+}
 .slice__n {
   font-family: var(--num);
   font-size: 12px;
   letter-spacing: 2px;
   color: var(--red);
+  transition: color 0.25s var(--ease);
 }
 .slice h3 {
   margin-top: 12px;
   font-family: var(--serif);
   font-weight: 700;
-  font-size: 18px;
+  font-size: 19px;
   letter-spacing: 0.5px;
   color: var(--text-2);
+  transition: color 0.25s var(--ease);
 }
 .slice p {
   margin-top: 10px;
-  font-size: 12.5px;
+  font-size: 13px;
   line-height: 1.85;
-  color: var(--muted-2);
+  color: #a8acb5;
+  transition: color 0.25s var(--ease);
+}
+/* 鼠标移上去整块点亮：线变红、标题转红、正文提亮（不做位移，免得四张线不齐） */
+.slice:hover::before,
+.slice.is-hover::before {
+  background: var(--red);
+  box-shadow: 0 0 18px -2px rgba(224, 36, 47, 0.75);
+}
+.slice:hover .slice__n,
+.slice.is-hover .slice__n {
+  color: #ff7b83;
+}
+.slice:hover h3,
+.slice.is-hover h3 {
+  color: var(--red);
+}
+.slice:hover p,
+.slice.is-hover p {
+  color: #eef0f4;
 }
 
 /* ---------- 17. CTA ---------- */
