@@ -377,6 +377,7 @@
     } else {
       render();
     }
+    if (window.__sfx) window.__sfx.play("page");
     if (user) restart();
   }
 
@@ -1133,6 +1134,16 @@
       entries.forEach(function (en) {
         if (!en.isIntersecting) return;
         tree.classList.add("is-play");
+        if (window.__sfx) {
+          window.__sfx.play("spark");
+          /* 枝条长出来后，叶子每三个响一下，别吵成连珠炮 */
+          Array.prototype.forEach.call(leaves, function (li, i) {
+            if (i % 3 !== 0) return;
+            setTimeout(function () {
+              window.__sfx.play("leaf");
+            }, 1750 + i * 45);
+          });
+        }
         io.disconnect();
       });
     },
@@ -1165,6 +1176,30 @@
     if (ctx.state === "suspended") ctx.resume();
     return ctx;
   }
+
+  /* 对外暴露：window.__sfx.play('click' | 'page' | 'leaf' | 'spark') */
+  window.__sfx = {
+    get on() {
+      return on;
+    },
+    play: function (kind) {
+      if (!on) return;
+      if (kind === "page") {
+        blip(880, 0.05, 0.04, "triangle");
+        setTimeout(function () {
+          blip(660, 0.06, 0.03, "triangle");
+        }, 45);
+      } else if (kind === "leaf") {
+        blip(1480, 0.025, 0.011, "triangle");
+      } else if (kind === "spark") {
+        blip(260, 0.16, 0.03, "sine", 180);
+      } else if (kind === "open") {
+        blip(620, 0.1, 0.045, "sine", 900);
+      } else {
+        blip(560, 0.085, 0.05, "sine", 372);
+      }
+    }
+  };
 
   function blip(freq, dur, vol, type, slideTo) {
     if (!on) return;
