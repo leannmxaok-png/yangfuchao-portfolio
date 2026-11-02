@@ -7,6 +7,17 @@
 <meta name="description" content="杨富超：云南中医药大学护理学本科，做过短视频、销售与跨境电商。" />
 <link rel="stylesheet" href="assets/css/style.css" />
 <script>document.documentElement.classList.add("js");</script>
+<script>
+  /* 兜底：3 秒后不管动画有没有跑完，文字一律恢复正常颜色 */
+  setTimeout(function () {
+    var els = document.querySelectorAll("[data-sweep]");
+    for (var i = 0; i < els.length; i++) {
+      els[i].style.webkitTextFillColor = "currentColor";
+      els[i].style.backgroundImage = "none";
+    }
+  }, 3000);
+</script>
+
 </head>
 <body>
 

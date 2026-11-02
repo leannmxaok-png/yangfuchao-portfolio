@@ -7,6 +7,17 @@
 <meta name="description" content="杨富超的作品：抖音护理科普、TikTok 起号、AIGC 科普动画、招生宣传片、Ozon 详情页、自建内容中台与 AI 漫剧工作台。" />
 <link rel="stylesheet" href="assets/css/style.css" />
 <script>document.documentElement.classList.add("js");</script>
+<script>
+  /* 兜底：3 秒后不管动画有没有跑完，文字一律恢复正常颜色 */
+  setTimeout(function () {
+    var els = document.querySelectorAll("[data-sweep]");
+    for (var i = 0; i < els.length; i++) {
+      els[i].style.webkitTextFillColor = "currentColor";
+      els[i].style.backgroundImage = "none";
+    }
+  }, 3000);
+</script>
+
 </head>
 <body>
 

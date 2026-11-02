@@ -5420,35 +5420,56 @@ a.cap:hover .cap__go {
   }
 }
 
-/* 文字整体从左到右显影 */
+/* 文字整体从左到右显影：纯 CSS 动画，跑完自动恢复正色，不依赖 JS */
 @supports ((-webkit-background-clip: text) or (background-clip: text)) {
   .js [data-sweep] {
+    --sw-dur: 1.5s;
+    --sw-delay: 0.3s;
     background-image: linear-gradient(
       90deg,
-      #ffffff 0%,
-      #ffffff 52%,
-      rgba(255, 255, 255, 0.12) 52%,
-      rgba(255, 255, 255, 0.12) 100%
+      currentColor 0%,
+      currentColor 52%,
+      rgba(255, 255, 255, 0.1) 52%,
+      rgba(255, 255, 255, 0.1) 100%
     );
     background-size: 210% 100%;
     background-position: 100% 0;
     -webkit-background-clip: text;
     background-clip: text;
-    -webkit-text-fill-color: transparent;
-    color: transparent;
-    transition: background-position 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+    -webkit-text-fill-color: rgba(255, 255, 255, 0.3);
+    animation: sweepReveal var(--sw-dur) cubic-bezier(0.4, 0, 0.2, 1) var(--sw-delay) 1 both;
   }
-  [data-sweep].is-swept {
-    background-position: 0 0;
+  @keyframes sweepReveal {
+    0% {
+      background-position: 100% 0;
+      -webkit-text-fill-color: rgba(255, 255, 255, 0.3);
+    }
+    94% {
+      background-position: 0 0;
+      -webkit-text-fill-color: rgba(255, 255, 255, 0.3);
+    }
+    100% {
+      background-position: 0 0;
+      -webkit-text-fill-color: currentColor;
+      background-image: none;
+    }
   }
-  /* 扫完之后恢复原本的填充色，别一直半透明白 */
-  [data-sweep].is-done {
-    background-image: none;
-    -webkit-text-fill-color: currentColor;
-    color: inherit;
+  /* 大标题笔画多，慢一点 */
+  .hero__title[data-sweep],
+  .page-title[data-sweep] {
+    --sw-dur: 1.85s;
+  }
+  /* 延迟按元素排：标题 → 介绍 → 标签 */
+  [data-sweep="420"] {
+    --sw-delay: 0.42s;
+  }
+  [data-sweep="520"] {
+    --sw-delay: 0.7s;
+  }
+  [data-sweep="640"] {
+    --sw-delay: 0.85s;
   }
 }
-
 /* 首页那五个身份标签：单个悬停放大 */
 .hero__meta > span {
   display: inline-block;

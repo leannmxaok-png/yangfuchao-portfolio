@@ -7,6 +7,17 @@
 <meta name="description" content="杨富超的获奖记录：护苗杯一等奖、创新创业三等奖、急救技能一等奖、单项奖学金等。" />
 <link rel="stylesheet" href="assets/css/style.css" />
 <script>document.documentElement.classList.add("js");</script>
+<script>
+  /* 兜底：3 秒后不管动画有没有跑完，文字一律恢复正常颜色 */
+  setTimeout(function () {
+    var els = document.querySelectorAll("[data-sweep]");
+    for (var i = 0; i < els.length; i++) {
+      els[i].style.webkitTextFillColor = "currentColor";
+      els[i].style.backgroundImage = "none";
+    }
+  }, 3000);
+</script>
+
 </head>
 <body>
 

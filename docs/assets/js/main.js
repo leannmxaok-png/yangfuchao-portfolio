@@ -1480,18 +1480,13 @@
   var els = Array.prototype.slice.call(document.querySelectorAll("[data-sweep]"));
   if (!els.length) return;
 
+  /* 文字显影交给 CSS 动画（跑完自动恢复正色），JS 只负责摆放光点 */
   function run(el) {
-    if (el.classList.contains("is-swept")) return;
     var spark = el.querySelector(".hero__spark");
     if (spark) {
       el.style.setProperty("--spark-w", el.offsetWidth + "px");
+      el.classList.add("is-swept");
     }
-    /* 先让它以半透明状态出现，再扫 */
-    el.classList.add("is-swept");
-    var big = el.classList.contains("hero__title") || el.classList.contains("page-title");
-    setTimeout(function () {
-      el.classList.add("is-done");
-    }, big ? 1900 : 1650);
   }
 
   if (!("IntersectionObserver" in window)) {

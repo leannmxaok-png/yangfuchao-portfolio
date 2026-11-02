@@ -7,6 +7,17 @@
 <meta name="description" content="杨富超的生活影像：大学男篮、3v3 高校篮球赛、实习、毕业，还有这些年一起滚过来的那几个人。" />
 <link rel="stylesheet" href="assets/css/style.css" />
 <script>document.documentElement.classList.add("js");</script>
+<script>
+  /* 兜底：3 秒后不管动画有没有跑完，文字一律恢复正常颜色 */
+  setTimeout(function () {
+    var els = document.querySelectorAll("[data-sweep]");
+    for (var i = 0; i < els.length; i++) {
+      els[i].style.webkitTextFillColor = "currentColor";
+      els[i].style.backgroundImage = "none";
+    }
+  }, 3000);
+</script>
+
 </head>
 <body>
 
