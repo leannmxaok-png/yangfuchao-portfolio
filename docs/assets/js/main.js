@@ -1513,3 +1513,109 @@
     io.observe(el);
   });
 })();
+
+/* ==========================================================================
+   3D 形象：默认只放灯光和浮尘，点了才加载 model-viewer 和模型
+   ========================================================================== */
+(function () {
+  "use strict";
+
+  var stage = document.querySelector("[data-studio]");
+  if (!stage) return;
+
+  var slot = stage.querySelector("[data-studio-slot]");
+  var idle = stage.querySelector("[data-studio-idle]");
+  var btn = stage.querySelector("[data-studio-load]");
+  var dust = stage.querySelector("[data-studio-dust]");
+  var ready = false;
+
+  /* 生成浮尘：30 粒，位置随机，速度随机，不占性能 */
+  if (dust) {
+    var frag = document.createDocumentFragment();
+    for (var i = 0; i < 30; i++) {
+      var li = document.createElement("li");
+      var s = 1.6 + Math.random() * 2.2;
+      li.style.setProperty("--x", (6 + Math.random() * 88).toFixed(2) + "%");
+      li.style.setProperty("--y", (18 + Math.random() * 76).toFixed(2) + "%");
+      li.style.setProperty("--s", s.toFixed(1) + "px");
+      li.style.setProperty("--dx", (Math.random() * 40 - 20).toFixed(0) + "px");
+      li.style.setProperty("--dur", (7 + Math.random() * 9).toFixed(1) + "s");
+      li.style.setProperty("--delay", (-Math.random() * 14).toFixed(1) + "s");
+      frag.appendChild(li);
+    }
+    dust.appendChild(frag);
+  }
+
+  function loadViewer() {
+    return new Promise(function (resolve, reject) {
+      if (window.customElements && window.customElements.get("model-viewer")) {
+        resolve();
+        return;
+      }
+      var s = document.createElement("script");
+      s.type = "module";
+      s.src = "assets/vendor/model-viewer.min.js";
+      s.onload = resolve;
+      s.onerror = reject;
+      document.head.appendChild(s);
+    });
+  }
+
+  function buildModel() {
+    var mv = document.createElement("model-viewer");
+    mv.setAttribute("src", "assets/models/avatar.glb");
+    mv.setAttribute("alt", "杨富超的 3D 人物模型");
+    mv.setAttribute("camera-controls", "");
+    mv.setAttribute("auto-rotate", "");
+    mv.setAttribute("auto-rotate-delay", "800");
+    mv.setAttribute("rotation-per-second", "10deg");
+    mv.setAttribute("camera-orbit", "180deg 84deg auto");
+    mv.setAttribute("field-of-view", "32deg");
+    mv.setAttribute("environment-image", "neutral");
+    mv.setAttribute("exposure", "0.78");
+    mv.setAttribute("shadow-intensity", "1.5");
+    mv.setAttribute("shadow-softness", "0.7");
+    mv.setAttribute("interaction-prompt", "none");
+    mv.setAttribute("touch-action", "pan-y");
+
+    mv.addEventListener("progress", function (e) {
+      var p = e.detail && e.detail.totalProgress ? e.detail.totalProgress : 0;
+      if (btn) btn.textContent = "加载中 " + Math.round(p * 100) + "%";
+    });
+    mv.addEventListener("load", function () {
+      stage.classList.remove("is-loading");
+      stage.classList.add("is-ready");
+    });
+    mv.addEventListener("error", function () {
+      if (idle) {
+        idle.innerHTML = '<p class="studio__hint">模型加载失败，刷新再试</p>';
+        idle.style.opacity = 1;
+        idle.style.pointerEvents = "auto";
+      }
+    });
+
+    slot.appendChild(mv);
+  }
+
+  if (btn) {
+    btn.addEventListener("click", function () {
+      if (ready) return;
+      ready = true;
+      stage.classList.add("is-loading");
+      btn.disabled = true;
+      loadViewer()
+        .then(function () {
+          return window.customElements.whenDefined("model-viewer");
+        })
+        .then(buildModel)
+        .catch(function () {
+          stage.classList.remove("is-loading");
+          if (idle) {
+            idle.innerHTML = '<p class="studio__hint">3D 组件加载失败，检查网络后刷新</p>';
+            idle.style.opacity = 1;
+            idle.style.pointerEvents = "auto";
+          }
+        });
+    });
+  }
+})();

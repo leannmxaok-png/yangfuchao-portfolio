@@ -5631,3 +5631,193 @@ a.cap:hover .cap__go {
 .page-title[data-rise].is-rise {
   transform: none;
 }
+
+/* ---------- 41. 3D 形象舞台 ---------- */
+.studio {
+  padding: 84px 0 96px;
+}
+.studio__stage {
+  position: relative;
+  height: 620px;
+  margin-top: 30px;
+  overflow: hidden;
+  border: 1px solid #1b1d24;
+  background: radial-gradient(
+    120% 88% at 50% 4%,
+    #171a21 0%,
+    #0b0d12 44%,
+    #05060a 100%
+  );
+  isolation: isolate;
+}
+/* 顶部打下来的一束光 */
+.studio__cone {
+  position: absolute;
+  left: 50%;
+  top: -10%;
+  width: 64%;
+  height: 88%;
+  transform: translateX(-50%);
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 246, 238, 0.15) 0%,
+    rgba(255, 246, 238, 0.05) 48%,
+    rgba(255, 246, 238, 0) 78%
+  );
+  clip-path: polygon(43% 0, 57% 0, 84% 100%, 16% 100%);
+  filter: blur(34px);
+  opacity: 0.72;
+  mix-blend-mode: screen;
+  z-index: 1;
+}
+/* 灯口那个亮点 */
+.studio__cone::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 0;
+  width: 160px;
+  height: 74px;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(
+    50% 50% at 50% 50%,
+    rgba(255, 246, 238, 0.55) 0%,
+    rgba(255, 236, 220, 0.18) 42%,
+    rgba(255, 236, 220, 0) 72%
+  );
+  filter: blur(16px);
+}
+/* 落在地上的光斑 */
+.studio__floor {
+  position: absolute;
+  left: 50%;
+  bottom: 2%;
+  width: 44%;
+  height: 128px;
+  transform: translateX(-50%);
+  pointer-events: none;
+  background: radial-gradient(
+    50% 50% at 50% 50%,
+    rgba(255, 214, 190, 0.26) 0%,
+    rgba(255, 170, 140, 0.08) 52%,
+    rgba(255, 170, 140, 0) 74%
+  );
+  filter: blur(14px);
+  z-index: 1;
+}
+/* 空气里的浮尘 */
+.studio__dust {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  pointer-events: none;
+  z-index: 2;
+}
+.studio__dust li {
+  position: absolute;
+  left: var(--x);
+  top: var(--y);
+  width: var(--s);
+  height: var(--s);
+  border-radius: 50%;
+  background: rgba(255, 240, 228, 0.9);
+  box-shadow: 0 0 8px rgba(255, 200, 170, 0.75);
+  opacity: 0;
+  animation: dustFloat var(--dur) linear var(--delay) infinite;
+}
+@keyframes dustFloat {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 24px, 0) scale(0.5);
+  }
+  16% {
+    opacity: 0.9;
+  }
+  72% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(var(--dx), -120px, 0) scale(1);
+  }
+}
+/* 模型容器 */
+.studio__slot {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+}
+.studio__slot model-viewer {
+  display: block;
+  width: 100%;
+  height: 100%;
+  transform: scale(0.84);
+  transform-origin: 50% 46%;
+  background-color: transparent;
+  --poster-color: transparent;
+  opacity: 0;
+  transition: opacity 0.9s var(--ease);
+}
+.studio__stage.is-ready .studio__slot model-viewer {
+  opacity: 1;
+}
+/* 未加载时的提示层 */
+.studio__idle {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  transition: opacity 0.35s var(--ease);
+}
+.studio__stage.is-loading .studio__idle,
+.studio__stage.is-ready .studio__idle {
+  opacity: 0;
+  pointer-events: none;
+}
+.studio__hint {
+  margin: 0;
+  font-family: var(--num);
+  font-size: 11.5px;
+  letter-spacing: 2px;
+  color: #8f939e;
+}
+.studio__btn {
+  min-width: 176px;
+}
+/* 加载进度条 */
+.studio__bar {
+  width: 176px;
+  height: 2px;
+  background: #23262e;
+  overflow: hidden;
+}
+.studio__bar i {
+  display: block;
+  width: 0;
+  height: 100%;
+  background: var(--red);
+  transition: width 0.25s linear;
+}
+@media (max-width: 860px) {
+  .studio {
+    padding: 64px 0 72px;
+  }
+  .studio__stage {
+    height: 400px;
+    margin-top: 22px;
+  }
+  .studio__cone {
+    width: 92%;
+  }
+  .studio__floor {
+    width: 62%;
+    height: 92px;
+  }
+}
