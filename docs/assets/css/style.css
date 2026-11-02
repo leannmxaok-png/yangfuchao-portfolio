@@ -5621,3 +5621,13 @@ a.cap:hover .cap__go {
     display: none;
   }
 }
+
+/* 大标题不走 background-clip（那套会让字在不同 DPI 下渲染变样），只做上滑淡入 */
+.hero__title[data-rise],
+.page-title[data-rise] {
+  transform: translateY(-18px);
+}
+.hero__title[data-rise].is-rise,
+.page-title[data-rise].is-rise {
+  transform: none;
+}
