@@ -1569,12 +1569,14 @@
     mv.setAttribute("auto-rotate", "");
     mv.setAttribute("auto-rotate-delay", "800");
     mv.setAttribute("rotation-per-second", "10deg");
-    mv.setAttribute("camera-orbit", "180deg 84deg auto");
-    mv.setAttribute("field-of-view", "32deg");
-    mv.setAttribute("environment-image", "neutral");
-    mv.setAttribute("exposure", "0.78");
-    mv.setAttribute("shadow-intensity", "1.5");
-    mv.setAttribute("shadow-softness", "0.7");
+    /* 机位降到胸口高度、换 24° 长焦：人像摄影的标准视角，脸不会变形 */
+    mv.setAttribute("camera-orbit", "180deg 88deg auto");
+    mv.setAttribute("field-of-view", "24deg");
+    /* 自定义影棚布光：左前上主光 + 右后补光 + 地面反弹 */
+    mv.setAttribute("environment-image", "assets/models/studio.hdr");
+    mv.setAttribute("exposure", "0.82");
+    mv.setAttribute("shadow-intensity", "2.1");
+    mv.setAttribute("shadow-softness", "0.45");
     mv.setAttribute("interaction-prompt", "none");
     mv.setAttribute("touch-action", "pan-y");
 
