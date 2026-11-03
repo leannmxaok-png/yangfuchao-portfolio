@@ -1621,3 +1621,139 @@
     });
   }
 })();
+
+/* ==========================================================================
+   项目详情：点卡片右侧滑出抽屉，内容来自 content/projects.json
+   ========================================================================== */
+(function () {
+  "use strict";
+
+  var modal = document.querySelector("[data-pmodal]");
+  if (!modal || !document.querySelector("[data-project]")) return;
+
+  var panel = modal.querySelector(".pmodal__panel");
+  var bodyEl = modal.querySelector("[data-pm-body]");
+  var data = null;
+  var loading = false;
+  var lastFocus = null;
+
+  function esc(s) {
+    return String(s == null ? "" : s)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;");
+  }
+
+  function sec(title, inner) {
+    return '<section class="pm-sec"><h3>' + esc(title) + "</h3>" + inner + "</section>";
+  }
+
+  function render(p) {
+    var d = (p && p.detail) || {};
+    var html = "";
+
+    if (d.background && d.background.trim()) {
+      html += sec("背景 · 为什么做", "<p>" + esc(d.background) + "</p>");
+    }
+    if (d.role && d.role.trim()) {
+      html += sec("我的角色", "<p>" + esc(d.role) + "</p>");
+    }
+    if (d.process && d.process.length) {
+      html += sec(
+        "我是怎么做的",
+        "<ol>" + d.process.map(function (t) { return "<li>" + esc(t) + "</li>"; }).join("") + "</ol>"
+      );
+    }
+    if (d.results && d.results.length) {
+      html += sec(
+        "结果",
+        "<ul>" + d.results.map(function (t) { return "<li>" + esc(t) + "</li>"; }).join("") + "</ul>"
+      );
+    }
+    if (d.gallery && d.gallery.length) {
+      html += sec(
+        "图",
+        '<div class="pm-gallery">' +
+          d.gallery.map(function (src) {
+            return '<img src="' + esc(src) + '" alt="" loading="lazy" />';
+          }).join("") +
+          "</div>"
+      );
+    }
+
+    if (!html) {
+      html = '<p class="pm-empty">这个项目的详细复盘还在整理中。想了解过程，可以直接问我。</p>';
+    }
+    bodyEl.innerHTML = html;
+  }
+
+  function fill(p) {
+    modal.querySelector("[data-pm-title]").textContent = p.title || "";
+    modal.querySelector("[data-pm-period]").textContent = p.period || "";
+    modal.querySelector("[data-pm-tag]").textContent = p.tag || "";
+    modal.querySelector("[data-pm-summary]").textContent = p.summary || "";
+    render(p);
+  }
+
+  function open(id) {
+    lastFocus = document.activeElement;
+    modal.hidden = false;
+    document.body.classList.add("is-locked");
+    panel.scrollTop = 0;
+
+    function show() {
+      var list = (data && data.projects) || [];
+      var p = null;
+      for (var i = 0; i < list.length; i++) {
+        if (list[i].id === id) { p = list[i]; break; }
+      }
+      if (p) fill(p);
+      else {
+        bodyEl.innerHTML = '<p class="pm-empty">没找到这个项目的资料。</p>';
+      }
+      modal.querySelector(".pmodal__x").focus();
+    }
+
+    if (data) { show(); return; }
+    if (loading) return;
+    loading = true;
+    fetch("content/projects.json", { cache: "no-cache" })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (json) { data = json; loading = false; show(); })
+      .catch(function () {
+        loading = false;
+        bodyEl.innerHTML = '<p class="pm-empty">资料读取失败，刷新再试。</p>';
+      });
+  }
+
+  function close() {
+    modal.hidden = true;
+    document.body.classList.remove("is-locked");
+    if (lastFocus && lastFocus.focus) lastFocus.focus();
+  }
+
+  document.querySelectorAll("[data-project]").forEach(function (card) {
+    card.addEventListener("click", function () {
+      open(card.getAttribute("data-project"));
+    });
+    card.addEventListener("keydown", function (e) {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        open(card.getAttribute("data-project"));
+      }
+    });
+  });
+
+  modal.querySelectorAll("[data-pmodal-close]").forEach(function (el) {
+    el.addEventListener("click", close);
+  });
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape" && !modal.hidden) close();
+  });
+
+  /* 点图片看大图 */
+  bodyEl.addEventListener("click", function (e) {
+    var img = e.target.closest && e.target.closest(".pm-gallery img");
+    if (img) window.open(img.getAttribute("src"), "_blank");
+  });
+})();

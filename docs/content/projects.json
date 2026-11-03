@@ -1,0 +1,60 @@
+{
+  "projects": [
+    {
+      "id": "secondhand-books",
+      "title": "校园二手书回收",
+      "period": "2025.11 — 2026.03",
+      "tag": "校园",
+      "summary": "毕业季低价收货、按科目分拣定价、宿舍楼内当面交付。把一本教材从「卖废纸」变成「下一届还能用」，中间赚的是信息差和履约效率。",
+      "detail": {
+        "background": "",
+        "role": "",
+        "process": [],
+        "results": [],
+        "gallery": []
+      }
+    },
+    {
+      "id": "tiktok",
+      "title": "TikTok 账号起号",
+      "period": "2026.07 — 2026.08",
+      "tag": "海外",
+      "summary": "零投放冷启动，从竞品拆解、选题本地化到发布节奏控制，一个账号一个月内跑出单条最高 500 万+ 播放。",
+      "detail": {
+        "background": "",
+        "role": "",
+        "process": [],
+        "results": [],
+        "gallery": []
+      }
+    },
+    {
+      "id": "ozon",
+      "title": "Ozon 五金类目",
+      "period": "2026",
+      "tag": "跨境",
+      "summary": "五金小类目选品、比价、详情页本地化，跟进真实订单与售后。第一次完整看清一件商品从国内仓库到海外买家手里的全过程。",
+      "detail": {
+        "background": "",
+        "role": "",
+        "process": [],
+        "results": [],
+        "gallery": []
+      }
+    },
+    {
+      "id": "douyin-nursing",
+      "title": "抖音护理科普",
+      "period": "2025 — 2026",
+      "tag": "内容",
+      "summary": "把临床里最容易被误解的护理常识拆成 30 秒短视频。单条跑到 33.2 万播放、7000+ 赞，也成为账号数据最好的一批内容。",
+      "detail": {
+        "background": "",
+        "role": "",
+        "process": [],
+        "results": [],
+        "gallery": []
+      }
+    }
+  ]
+}
