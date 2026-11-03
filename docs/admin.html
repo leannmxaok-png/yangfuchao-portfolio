@@ -361,6 +361,7 @@
 
   function api(path, opts) {
     opts = opts || {};
+    opts.cache = "no-store";
     opts.headers = Object.assign({
       "Authorization": "Bearer " + token,
       "Accept": "application/vnd.github+json",
@@ -371,7 +372,12 @@
         if (r.status === 401) throw new Error("Token 无效或没权限");
         if (r.status === 404) throw new Error("找不到文件：" + path);
         if (r.ok) return r.json();
-        return r.text().then(function (t) { throw new Error(r.status + " " + t.slice(0, 160)); });
+        return r.text().then(function (t) {
+          var msg = "";
+          try { msg = (JSON.parse(t) || {}).message || ""; } catch (e) {}
+          if (/does not match|sha/i.test(msg)) throw new Error("SHA_CONFLICT");
+          throw new Error(r.status + " " + (msg || t.slice(0, 140)));
+        });
       });
   }
 
@@ -718,20 +724,38 @@
     var msg = isText
       ? "更新页面文案"
       : "更新项目内容：" + ((data.projects[current] || {}).title || "");
+    var body = b64encode(JSON.stringify(payload, null, 2) + "\n");
 
-    api(path + "?ref=" + BRANCH)
-      .then(function (res) {
-        /* 拿最新 sha，避免和别人的提交冲突 */
-        return api(path, {
-          method: "PUT",
-          body: JSON.stringify({
-            message: msg,
-            content: b64encode(JSON.stringify(payload, null, 2) + "\n"),
-            sha: res.sha,
-            branch: BRANCH
-          })
+    /* GitHub 的 Contents 接口有缓存，拿到的 sha 可能是旧的。
+       冲突就重新取一次 sha 再提交，最多试 3 轮。 */
+    function attempt(n) {
+      return api(path + "?ref=" + BRANCH + "&t=" + Date.now())
+        .then(function (res) {
+          return api(path, {
+            method: "PUT",
+            body: JSON.stringify({
+              message: msg,
+              content: body,
+              sha: res.sha,
+              branch: BRANCH
+            })
+          });
+        })
+        .catch(function (e) {
+          if (e.message === "SHA_CONFLICT" && n < 3) {
+            setState("版本冲突，正在重试（" + n + "/3）…");
+            return new Promise(function (r) { setTimeout(r, 900); }).then(function () {
+              return attempt(n + 1);
+            });
+          }
+          if (e.message === "SHA_CONFLICT") {
+            throw new Error("文件被别人改过。刷新页面重新连接，再点保存");
+          }
+          throw e;
         });
-      })
+    }
+
+    attempt(1)
       .then(function () {
         setState("已发布 · 约 1 分钟后生效", "ok");
         $save.disabled = false;
