@@ -317,6 +317,40 @@
   var data = null;
   var current = 0;
 
+  /* 页面文案（site.json） */
+  var TEXT_PATH = "docs/content/site.json";
+  var siteData = null;
+  var siteSha = null;
+  var mode = "proj";           /* proj | text */
+  var TEXT_FIELDS = [
+    { path: "hero.title",  label: "首页 · 大标题",      hint: "支持 <br> 换行，<em>…</em> 变红色毛笔字", big: true },
+    { path: "hero.sub",    label: "首页 · 三行介绍",    hint: "用 <br> 分行", big: true },
+    { path: "hero.quote",  label: "首页 · 右下角那句",  hint: "用 <br> 分行", big: true },
+    { path: "about.h2",    label: "关于我 · 自述标题" },
+    { path: "about.p1",    label: "关于我 · 第一段",    hint: "<b>…</b> 包住的关键词会变白加粗", big: true },
+    { path: "about.p2",    label: "关于我 · 第二段",    big: true },
+    { path: "about.p3",    label: "关于我 · 第三段",    big: true },
+    { path: "friends.ringTitle", label: "死党页 · 九宫格标题" },
+    { path: "friends.ringDesc",  label: "死党页 · 九宫格说明" },
+    { path: "friends.wallTitle", label: "死党页 · 照片墙标题", hint: "右边那个数字是自动统计的照片数，不用写" },
+    { path: "friends.wallDesc",  label: "死党页 · 照片墙说明" }
+  ];
+
+  function getPath(obj, path) {
+    return path.split(".").reduce(function (o, k) {
+      return o && typeof o === "object" ? o[k] : undefined;
+    }, obj);
+  }
+  function setPath(obj, path, val) {
+    var ks = path.split(".");
+    var o = obj;
+    for (var i = 0; i < ks.length - 1; i++) {
+      if (!o[ks[i]] || typeof o[ks[i]] !== "object") o[ks[i]] = {};
+      o = o[ks[i]];
+    }
+    o[ks[ks.length - 1]] = val;
+  }
+
   var $state = document.querySelector("[data-state]");
   var $gate = document.querySelector("[data-gate]");
   var $shell = document.querySelector("[data-shell]");
@@ -363,6 +397,14 @@
         var bytes = new Uint8Array(raw.length);
         for (var i = 0; i < raw.length; i++) bytes[i] = raw.charCodeAt(i);
         data = JSON.parse(new TextDecoder().decode(bytes));
+        return api(TEXT_PATH + "?ref=" + BRANCH);
+      })
+      .then(function (res2) {
+        siteSha = res2.sha;
+        var raw2 = atob(res2.content.replace(/\s/g, ""));
+        var b2 = new Uint8Array(raw2.length);
+        for (var j = 0; j < raw2.length; j++) b2[j] = raw2.charCodeAt(j);
+        siteData = JSON.parse(new TextDecoder().decode(b2));
         $gate.hidden = true;
         $shell.hidden = false;
         $save.disabled = false;
@@ -381,6 +423,18 @@
   /* ---------- 列表 ---------- */
   function renderList() {
     $list.innerHTML = "";
+
+    var t = document.createElement("button");
+    t.type = "button";
+    t.className = "side__item" + (mode === "text" ? " is-on" : "");
+    t.style.marginBottom = "14px";
+    t.appendChild(document.createTextNode("页面文案"));
+    var ts = document.createElement("small");
+    ts.textContent = "首页 / 关于我 / 死党页";
+    t.appendChild(ts);
+    t.addEventListener("click", openText);
+    $list.appendChild(t);
+
     data.projects.forEach(function (p, i) {
       var b = document.createElement("button");
       b.type = "button";
@@ -390,7 +444,10 @@
       var small = document.createElement("small");
       small.textContent = p.period || "";
       b.appendChild(small);
-      b.addEventListener("click", function () { openProject(i); });
+      b.addEventListener("click", function () {
+        mode = "proj";
+        openProject(i);
+      });
       $list.appendChild(b);
     });
   }
@@ -432,6 +489,7 @@
   }
 
   function openProject(i) {
+    mode = "proj";
     current = i;
     var p = data.projects[i];
     p.detail = p.detail || { background: "", role: "", process: [], results: [], gallery: [] };
@@ -532,6 +590,43 @@
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
+  /* ---------- 页面文案 ---------- */
+  function openText() {
+    mode = "text";
+    $editor.innerHTML = "";
+
+    var h = document.createElement("h3");
+    h.className = "sec-title";
+    h.textContent = "页面文案";
+    $editor.appendChild(h);
+
+    var tip = document.createElement("p");
+    tip.style.cssText = "margin:0 0 26px;font-size:12.5px;line-height:1.9;color:#7e828c";
+    tip.textContent = "各页顶部的标题和说明。可以写 <br> 换行、<b>加粗</b>、<em>红色毛笔字</em>。";
+    $editor.appendChild(tip);
+
+    TEXT_FIELDS.forEach(function (f) {
+      var val = getPath(siteData, f.path);
+      var node = f.big
+        ? area(val, function (v) { setPath(siteData, f.path, v); }, "", true)
+        : input(val, function (v) { setPath(siteData, f.path, v); });
+      $editor.appendChild(field(f.label, f.hint, node));
+    });
+
+    var foot = document.createElement("div");
+    foot.style.marginTop = "34px";
+    var saveBtn = document.createElement("button");
+    saveBtn.type = "button";
+    saveBtn.className = "btn";
+    saveBtn.textContent = "保存并发布";
+    saveBtn.addEventListener("click", saveAll);
+    foot.appendChild(saveBtn);
+    $editor.appendChild(foot);
+
+    renderList();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
   function splitLines(v) {
     return String(v || "")
       .split("\n")
@@ -613,19 +708,26 @@
 
   /* ---------- 保存 ---------- */
   function saveAll() {
-    if (!data) return;
+    if (!data || !siteData) return;
     $save.disabled = true;
     setState("提交中…");
 
-    api(JSON_PATH + "?ref=" + BRANCH)
+    var isText = mode === "text";
+    var path = isText ? TEXT_PATH : JSON_PATH;
+    var payload = isText ? siteData : data;
+    var msg = isText
+      ? "更新页面文案"
+      : "更新项目内容：" + ((data.projects[current] || {}).title || "");
+
+    api(path + "?ref=" + BRANCH)
       .then(function (res) {
-        fileSha = res.sha; /* 拿最新 sha，避免冲突 */
-        return api(JSON_PATH, {
+        /* 拿最新 sha，避免和别人的提交冲突 */
+        return api(path, {
           method: "PUT",
           body: JSON.stringify({
-            message: "更新项目内容：" + (data.projects[current] || {}).title,
-            content: b64encode(JSON.stringify(data, null, 2) + "\n"),
-            sha: fileSha,
+            message: msg,
+            content: b64encode(JSON.stringify(payload, null, 2) + "\n"),
+            sha: res.sha,
             branch: BRANCH
           })
         });
